@@ -7,14 +7,22 @@ import {
   PreviewButton,
 } from './home.styles';
 
-export function CaptureCard({ capture }: { capture: Capture }) {
+export function CaptureCard({
+  capture,
+  onDelete,
+}: {
+  capture: Capture;
+  onDelete(captureId: string): void;
+}) {
+  const home = window.screenMe.home;
+
   return (
     <Card>
       <PreviewButton
         aria-label={`Annotate ${capture.title}`}
-        onClick={() => void window.screenMe.openAnnotation(capture.id)}
+        onClick={() => void home?.openAnnotation(capture.id)}
       >
-        <img src={capture.displayImageUrl} alt="" />
+        <img src={capture.thumbnailImageUrl} alt="" />
       </PreviewButton>
       <CardBody>
         <CardTitle>{capture.title}</CardTitle>
@@ -29,6 +37,9 @@ export function CaptureCard({ capture }: { capture: Capture }) {
             })}
           </time>
         </CardMeta>
+        <button type="button" onClick={() => onDelete(capture.id)}>
+          Delete
+        </button>
       </CardBody>
     </Card>
   );

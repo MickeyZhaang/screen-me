@@ -17,6 +17,7 @@ const capture: Capture = {
   source: 'app',
   originalImageUrl: 'screen-me://assets/original',
   displayImageUrl: 'screen-me://assets/original',
+  thumbnailImageUrl: 'screen-me://assets/thumbnail',
   annotationJson: null,
   width: 1280,
   height: 720,
@@ -26,11 +27,12 @@ const capture: Capture = {
 
 const createDependencies = () => {
   const captures: CaptureUseCases = {
-    list: vi.fn(() => [capture]),
+    list: vi.fn(() => ({ captures: [capture], nextOffset: null })),
     get: vi.fn(() => capture),
     capturePrimaryDisplay: vi.fn(async () => capture),
     importSystemScreenshot: vi.fn(async () => capture),
     saveAnnotations: vi.fn(async () => capture),
+    delete: vi.fn(async () => undefined),
   };
   const annotations: AnnotationOpener = {
     openAnnotation: vi.fn(async () => undefined),

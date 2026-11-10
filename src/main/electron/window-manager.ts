@@ -1,10 +1,16 @@
 import { join } from 'node:path';
-import { BrowserWindow, screen } from 'electron';
+import { BrowserWindow, screen, type WebContents } from 'electron';
 import type { AnnotationOpener } from '../application/capture-controller';
+import { appOrigin, isTrustedRendererUrl } from './app-origin';
+
+type WindowRole =
+  | { kind: 'home' }
+  | { kind: 'annotation'; captureId: string };
 
 export class WindowManager implements AnnotationOpener {
   private mainWindow: BrowserWindow | null = null;
   private readonly annotationWindows = new Map<string, BrowserWindow>();
+  private readonly roles = new Map<number, WindowRole>();
 
   async openMain(): Promise<void> {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
@@ -22,11 +28,14 @@ export class WindowManager implements AnnotationOpener {
       backgroundColor: '#f4f1ea',
     });
     this.mainWindow = window;
+    const contentsId = window.webContents.id;
+    this.roles.set(contentsId, { kind: 'home' });
     this.lockNavigation(window);
     window.on('closed', () => {
       if (this.mainWindow === window) {
         this.mainWindow = null;
       }
+      this.roles.delete(contentsId);
     });
     await this.loadRenderer(window);
   }
@@ -50,14 +59,30 @@ export class WindowManager implements AnnotationOpener {
       show: false,
     });
     this.annotationWindows.set(captureId, window);
+    const contentsId = window.webContents.id;
+    this.roles.set(contentsId, { kind: 'annotation', captureId });
     this.lockNavigation(window);
     window.on('closed', () => {
       if (this.annotationWindows.get(captureId) === window) {
         this.annotationWindows.delete(captureId);
       }
+      this.roles.delete(contentsId);
     });
     await this.loadRenderer(window, { mode: 'annotation', captureId });
     window.show();
+  }
+
+  isHome(contents: WebContents): boolean {
+    return this.roles.get(contents.id)?.kind === 'home';
+  }
+
+  canAccessCapture(contents: WebContents, captureId: string): boolean {
+    const role = this.roles.get(contents.id);
+    return role?.kind === 'annotation' && role.captureId === captureId;
+  }
+
+  isTrusted(contents: WebContents): boolean {
+    return isTrustedRendererUrl(contents.getURL());
   }
 
   private secureWindowOptions() {
@@ -88,9 +113,10 @@ export class WindowManager implements AnnotationOpener {
       await window.loadURL(url.toString());
       return;
     }
-    await window.loadFile(
-      join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
-      { query },
-    );
+    const url = new URL(`${appOrigin}/index.html`);
+    for (const [key, value] of Object.entries(query)) {
+      url.searchParams.set(key, value);
+    }
+    await window.loadURL(url.toString());
   }
 }

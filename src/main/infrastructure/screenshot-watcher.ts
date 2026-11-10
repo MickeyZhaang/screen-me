@@ -7,6 +7,8 @@ import { promisify } from 'node:util';
 
 const executeFile = promisify(execFile);
 const supportedExtensions = new Set(['.png', '.jpg', '.jpeg', '.webp']);
+const maxHandledPaths = 1_000;
+const maxPendingPaths = 100;
 
 export class ScreenshotWatcher {
   private watcher: FSWatcher | null = null;
@@ -34,6 +36,8 @@ export class ScreenshotWatcher {
       const existingTimer = this.pending.get(filePath);
       if (existingTimer) {
         clearTimeout(existingTimer);
+      } else if (this.pending.size >= maxPendingPaths) {
+        return;
       }
       this.pending.set(
         filePath,
@@ -73,10 +77,20 @@ export class ScreenshotWatcher {
       if (!(await this.isScreenshot(filePath))) {
         return;
       }
-      this.handled.add(filePath);
+      this.addHandledPath(filePath);
       await this.onScreenshot(filePath);
     } catch {
       this.handled.delete(filePath);
+    }
+  }
+
+  private addHandledPath(filePath: string): void {
+    this.handled.add(filePath);
+    if (this.handled.size > maxHandledPaths) {
+      const oldest = this.handled.values().next().value;
+      if (oldest) {
+        this.handled.delete(oldest);
+      }
     }
   }
 

@@ -29,7 +29,11 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
   useEffect(() => {
     let cancelled = false;
     const initialize = async () => {
-      const nextCapture = await window.screenMe.getCapture(captureId);
+      const annotation = window.screenMe.annotation;
+      if (!annotation) {
+        throw new Error('The annotation API is unavailable in this window');
+      }
+      const nextCapture = await annotation.getCapture(captureId);
       const image = await loadImage(nextCapture.originalImageUrl);
       if (cancelled) {
         return;
@@ -182,9 +186,13 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
     setSaving(true);
     setError(null);
     try {
+      const annotation = window.screenMe.annotation;
+      if (!annotation) {
+        throw new Error('The annotation API is unavailable in this window');
+      }
       canvas.discardActiveObject();
       canvas.requestRenderAll();
-      await window.screenMe.saveAnnotations({
+      await annotation.saveAnnotations({
         captureId: capture.id,
         annotationJson: serializeAnnotation(canvas),
         renderedDataUrl: await renderAnnotatedImage(canvas, image),

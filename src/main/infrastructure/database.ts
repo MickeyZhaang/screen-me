@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import { randomUUID } from 'node:crypto';
+import { capturePageSize } from '../../shared/captures/limits';
 
 export interface AssetRecord {
   id: string;
@@ -19,6 +20,7 @@ export interface CaptureRecord {
   source: 'app' | 'system';
   originalAssetId: string;
   renderedAssetId: string | null;
+  thumbnailAssetId: string | null;
   annotationJson: string | null;
   width: number;
   height: number;
@@ -33,6 +35,7 @@ interface CaptureRow {
   source: 'app' | 'system';
   original_asset_id: string;
   rendered_asset_id: string | null;
+  thumbnail_asset_id: string | null;
   annotation_json: string | null;
   width: number;
   height: number;
@@ -70,18 +73,20 @@ export class AppDatabase {
     title: string;
     source: 'app' | 'system';
     asset: AssetRecord;
+    thumbnail: AssetRecord;
   }): CaptureRecord {
     const now = new Date().toISOString();
     const captureId = randomUUID();
     const blockId = randomUUID();
     const transaction = this.connection.transaction(() => {
       this.insertAsset(input.asset);
+      this.insertAsset(input.thumbnail);
       this.connection
         .prepare(
           `INSERT INTO captures (
-            id, document_id, title, source, original_asset_id,
+            id, document_id, title, source, original_asset_id, thumbnail_asset_id,
             width, height, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
         .run(
           captureId,
@@ -89,6 +94,7 @@ export class AppDatabase {
           input.title,
           input.source,
           input.asset.id,
+          input.thumbnail.id,
           input.asset.width,
           input.asset.height,
           now,
@@ -115,10 +121,15 @@ export class AppDatabase {
     captureId: string,
     annotationJson: string,
     renderedAsset: AssetRecord,
-  ): CaptureRecord {
+  ): { capture: CaptureRecord; replacedAsset: AssetRecord | null } {
+    let replacedAsset: AssetRecord | null = null;
     const transaction = this.connection.transaction(() => {
+      const current = this.getCapture(captureId);
+      replacedAsset = current.renderedAssetId
+        ? this.getAsset(current.renderedAssetId)
+        : null;
       this.insertAsset(renderedAsset);
-      const result = this.connection
+      this.connection
         .prepare(
           `UPDATE captures
            SET annotation_json = ?, rendered_asset_id = ?, updated_at = ?
@@ -130,25 +141,51 @@ export class AppDatabase {
           new Date().toISOString(),
           captureId,
         );
-      if (result.changes !== 1) {
-        throw new Error('Capture not found');
-      }
     });
     transaction();
-    return this.getCapture(captureId);
+    return { capture: this.getCapture(captureId), replacedAsset };
   }
 
-  listCaptures(): CaptureRecord[] {
+  deleteCapture(captureId: string): AssetRecord[] {
+    const transaction = this.connection.transaction(() => {
+      const capture = this.getCapture(captureId);
+      const assetIds = [
+        capture.originalAssetId,
+        capture.renderedAssetId,
+        capture.thumbnailAssetId,
+      ].filter((assetId): assetId is string => Boolean(assetId));
+      const assets = assetIds.map((assetId) => this.getAsset(assetId));
+      this.connection
+        .prepare('DELETE FROM document_blocks WHERE capture_id = ?')
+        .run(captureId);
+      this.connection.prepare('DELETE FROM captures WHERE id = ?').run(captureId);
+      for (const assetId of assetIds) {
+        this.connection.prepare('DELETE FROM assets WHERE id = ?').run(assetId);
+      }
+      return assets;
+    });
+    return transaction();
+  }
+
+  listCaptures(offset: number): {
+    captures: CaptureRecord[];
+    nextOffset: number | null;
+  } {
     const rows = this.connection
       .prepare(
         `SELECT captures.*
          FROM document_blocks
          JOIN captures ON captures.id = document_blocks.capture_id
          WHERE document_blocks.document_id = ?
-         ORDER BY document_blocks.position DESC`,
+         ORDER BY document_blocks.position DESC
+         LIMIT ? OFFSET ?`,
       )
-      .all(this.inboxDocumentId) as CaptureRow[];
-    return rows.map(this.mapCapture);
+      .all(this.inboxDocumentId, capturePageSize + 1, offset) as CaptureRow[];
+    const hasMore = rows.length > capturePageSize;
+    return {
+      captures: rows.slice(0, capturePageSize).map(this.mapCapture),
+      nextOffset: hasMore ? offset + capturePageSize : null,
+    };
   }
 
   getCapture(captureId: string): CaptureRecord {
@@ -168,16 +205,31 @@ export class AppDatabase {
     if (!row) {
       throw new Error('Asset not found');
     }
-    return {
-      id: row.id,
-      relativePath: row.relative_path,
-      mediaType: row.media_type,
-      width: row.width,
-      height: row.height,
-      byteSize: row.byte_size,
-      sha256: row.sha256,
-      createdAt: row.created_at,
-    };
+    return this.mapAsset(row);
+  }
+
+  listAssetPaths(): string[] {
+    return (
+      this.connection.prepare('SELECT relative_path FROM assets').all() as {
+        relative_path: string;
+      }[]
+    ).map((asset) => asset.relative_path);
+  }
+
+  getScreenshotWatcherEnabled(): boolean {
+    const row = this.connection
+      .prepare('SELECT value FROM settings WHERE key = ?')
+      .get('screenshot_watcher_enabled') as { value: string } | undefined;
+    return row?.value === 'true';
+  }
+
+  setScreenshotWatcherEnabled(enabled: boolean): void {
+    this.connection
+      .prepare(
+        `INSERT INTO settings (key, value) VALUES (?, ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+      )
+      .run('screenshot_watcher_enabled', String(enabled));
   }
 
   private insertAsset(asset: AssetRecord): void {
@@ -226,6 +278,7 @@ export class AppDatabase {
         source TEXT NOT NULL CHECK (source IN ('app', 'system')),
         original_asset_id TEXT NOT NULL REFERENCES assets(id),
         rendered_asset_id TEXT REFERENCES assets(id),
+        thumbnail_asset_id TEXT REFERENCES assets(id),
         annotation_json TEXT,
         width INTEGER NOT NULL,
         height INTEGER NOT NULL,
@@ -242,9 +295,23 @@ export class AppDatabase {
         UNIQUE(document_id, position)
       );
 
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+
       CREATE INDEX IF NOT EXISTS document_blocks_document_position
       ON document_blocks(document_id, position);
     `);
+    const captureColumns = this.connection
+      .prepare('PRAGMA table_info(captures)')
+      .all() as { name: string }[];
+    if (!captureColumns.some((column) => column.name === 'thumbnail_asset_id')) {
+      this.connection.exec(
+        'ALTER TABLE captures ADD COLUMN thumbnail_asset_id TEXT REFERENCES assets(id)',
+      );
+    }
+    this.connection.pragma('user_version = 3');
     const now = new Date().toISOString();
     this.connection
       .prepare(
@@ -262,11 +329,25 @@ export class AppDatabase {
       source: row.source,
       originalAssetId: row.original_asset_id,
       renderedAssetId: row.rendered_asset_id,
+      thumbnailAssetId: row.thumbnail_asset_id,
       annotationJson: row.annotation_json,
       width: row.width,
       height: row.height,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+    };
+  }
+
+  private mapAsset(row: AssetRow): AssetRecord {
+    return {
+      id: row.id,
+      relativePath: row.relative_path,
+      mediaType: row.media_type,
+      width: row.width,
+      height: row.height,
+      byteSize: row.byte_size,
+      sha256: row.sha256,
+      createdAt: row.created_at,
     };
   }
 }

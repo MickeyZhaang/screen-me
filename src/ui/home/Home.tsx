@@ -15,7 +15,18 @@ import {
 import { useCaptureInbox } from './useCaptureInbox';
 
 export function Home() {
-  const { captures, status, busy, error, capture } = useCaptureInbox();
+  const {
+    captures,
+    status,
+    busy,
+    loadingMore,
+    nextOffset,
+    error,
+    capture,
+    loadMore,
+    remove,
+    setScreenshotWatcherEnabled,
+  } = useCaptureInbox();
 
   return (
     <Page>
@@ -38,7 +49,16 @@ export function Home() {
           Shortcut {status?.shortcut ?? '…'}
         </StatusPill>
         <StatusPill $tone={status?.screenshotWatcherRunning ? 'good' : 'warn'}>
-          Screenshot watcher {status?.screenshotWatcherRunning ? 'on' : 'off'}
+          <label>
+            <input
+              type="checkbox"
+              checked={status?.screenshotWatcherEnabled ?? false}
+              onChange={(event) =>
+                void setScreenshotWatcherEnabled(event.currentTarget.checked)
+              }
+            />
+            Screenshot watcher {status?.screenshotWatcherRunning ? 'on' : 'off'}
+          </label>
         </StatusPill>
         <StatusPill $tone={status?.screenPermission === 'granted' ? 'good' : 'warn'}>
           Screen permission {status?.screenPermission ?? 'unknown'}
@@ -50,7 +70,15 @@ export function Home() {
       {captures.length ? (
         <Grid>
           {captures.map((captureItem) => (
-            <CaptureCard key={captureItem.id} capture={captureItem} />
+            <CaptureCard
+              key={captureItem.id}
+              capture={captureItem}
+              onDelete={(captureId) => {
+                if (window.confirm('Delete this capture and its local files?')) {
+                  void remove(captureId);
+                }
+              }}
+            />
           ))}
         </Grid>
       ) : (
@@ -60,6 +88,11 @@ export function Home() {
           take a normal macOS screenshot.
         </Empty>
       )}
+      {nextOffset !== null ? (
+        <CaptureButton disabled={loadingMore} onClick={() => void loadMore()}>
+          {loadingMore ? 'Loading…' : 'Load more'}
+        </CaptureButton>
+      ) : null}
     </Page>
   );
 }

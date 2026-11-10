@@ -1,22 +1,39 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { ScreenMeApi } from './shared/ipc/contracts';
+import type {
+  AnnotationApi,
+  HomeApi,
+  ScreenMeApi,
+} from './shared/ipc/contracts';
 import { channels } from './shared/ipc/contracts';
 
-const api: ScreenMeApi = {
+const annotationMode = new URL(window.location.href).searchParams.get('mode') === 'annotation';
+
+const home: HomeApi = {
   getStatus: () => ipcRenderer.invoke(channels.getStatus),
-  listCaptures: () => ipcRenderer.invoke(channels.listCaptures),
-  getCapture: (captureId) =>
-    ipcRenderer.invoke(channels.getCapture, captureId),
+  listCaptures: (input) => ipcRenderer.invoke(channels.listCaptures, input),
   capturePrimary: () => ipcRenderer.invoke(channels.capturePrimary),
-  saveAnnotations: (input) =>
-    ipcRenderer.invoke(channels.saveAnnotations, input),
   openAnnotation: (captureId) =>
     ipcRenderer.invoke(channels.openAnnotation, captureId),
+  deleteCapture: (captureId) =>
+    ipcRenderer.invoke(channels.deleteCapture, captureId),
+  setScreenshotWatcherEnabled: (enabled) =>
+    ipcRenderer.invoke(channels.setScreenshotWatcherEnabled, enabled),
   onCapturesChanged: (listener) => {
     const handler = () => listener();
     ipcRenderer.on(channels.capturesChanged, handler);
     return () => ipcRenderer.removeListener(channels.capturesChanged, handler);
   },
+};
+
+const annotation: AnnotationApi = {
+  getCapture: (captureId) => ipcRenderer.invoke(channels.getCapture, captureId),
+  saveAnnotations: (input) =>
+    ipcRenderer.invoke(channels.saveAnnotations, input),
+};
+
+const api: ScreenMeApi = {
+  home: annotationMode ? null : home,
+  annotation: annotationMode ? annotation : null,
 };
 
 contextBridge.exposeInMainWorld('screenMe', api);

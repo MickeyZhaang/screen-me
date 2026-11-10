@@ -35,14 +35,16 @@ describe('AppDatabase', () => {
       title: 'First capture',
       source: 'app',
       asset: createAsset('first'),
+      thumbnail: createAsset('first-thumbnail'),
     });
     const second = database.createCapture({
       title: 'Second capture',
       source: 'system',
       asset: createAsset('second'),
+      thumbnail: createAsset('second-thumbnail'),
     });
 
-    expect(database.listCaptures().map((capture) => capture.id)).toEqual([
+    expect(database.listCaptures(0).captures.map((capture) => capture.id)).toEqual([
       second.id,
       first.id,
     ]);
@@ -57,6 +59,7 @@ describe('AppDatabase', () => {
       title: 'Annotated capture',
       source: 'app',
       asset: createAsset('original'),
+      thumbnail: createAsset('thumbnail'),
     });
 
     const updated = database.updateAnnotations(
@@ -65,8 +68,34 @@ describe('AppDatabase', () => {
       createAsset('rendered'),
     );
 
-    expect(updated.annotationJson).toBe('{"objects":[]}');
-    expect(updated.renderedAssetId).toBe('rendered');
+    expect(updated.capture.annotationJson).toBe('{"objects":[]}');
+    expect(updated.capture.renderedAssetId).toBe('rendered');
+    database.close();
+  });
+
+  it('deletes a capture with all of its assets', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'screen-me-test-'));
+    directories.push(directory);
+    const database = new AppDatabase(join(directory, 'test.sqlite'));
+    const capture = database.createCapture({
+      title: 'Deletable capture',
+      source: 'app',
+      asset: createAsset('original'),
+      thumbnail: createAsset('thumbnail'),
+    });
+    database.updateAnnotations(
+      capture.id,
+      '{"canvas":{"objects":[]}}',
+      createAsset('rendered'),
+    );
+
+    expect(database.deleteCapture(capture.id).map((asset) => asset.id).sort()).toEqual([
+      'original',
+      'rendered',
+      'thumbnail',
+    ]);
+    expect(database.listCaptures(0).captures).toEqual([]);
+    expect(() => database.getCapture(capture.id)).toThrow('Capture not found');
     database.close();
   });
 });

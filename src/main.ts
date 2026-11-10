@@ -13,6 +13,7 @@ import {
   captureShortcut,
   ShortcutManager,
 } from './main/electron/shortcut-manager';
+import { configureSessionSecurity } from './main/electron/session-security';
 import { WindowManager } from './main/electron/window-manager';
 import { AssetStore } from './main/infrastructure/asset-store';
 import { AppDatabase } from './main/infrastructure/database';
@@ -42,19 +43,39 @@ const startApplication = async (): Promise<void> => {
   );
   const shortcuts = new ShortcutManager();
   const assetProtocol = new AssetProtocol(database, assets);
-  const ipc = new IpcRouter(captures, () => ({
+  const getStatus = () => ({
     shortcut: captureShortcut,
     shortcutRegistered: shortcuts.registered,
     screenshotDirectory: screenshotWatcher.directory,
     screenshotWatcherRunning: screenshotWatcher.running,
+    screenshotWatcherEnabled: database.getScreenshotWatcherEnabled(),
     screenPermission:
       process.platform === 'darwin'
         ? systemPreferences.getMediaAccessStatus('screen')
         : 'unknown',
-  }));
+  });
+  const setScreenshotWatcherEnabled = async (enabled: boolean) => {
+    if (enabled) {
+      await screenshotWatcher.start();
+    } else {
+      screenshotWatcher.stop();
+    }
+    database.setScreenshotWatcherEnabled(enabled);
+    return getStatus();
+  };
+  const ipc = new IpcRouter(
+    captures,
+    windows,
+    getStatus,
+    setScreenshotWatcherEnabled,
+  );
 
   await assets.initialize();
-  await screenshotWatcher.start();
+  await assets.reconcile(database.listAssetPaths());
+  configureSessionSecurity();
+  if (database.getScreenshotWatcherEnabled()) {
+    await screenshotWatcher.start();
+  }
   assetProtocol.start();
   ipc.start();
   shortcuts.start(() => captures.capturePrimaryDisplay());
