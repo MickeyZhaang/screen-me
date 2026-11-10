@@ -12,6 +12,20 @@ A local-first Electron spike for capturing, annotating, and keeping screenshots 
 - Store metadata in SQLite and image assets in the application data directory.
 - Keep the React renderer isolated behind a typed preload API.
 
+## Architecture
+
+```text
+src/main/application  Capture workflows and capture-change coordination
+src/main/electron     Windows, IPC, shortcuts, screen capture, and protocols
+src/main/infrastructure  SQLite, asset files, and screenshot directory watching
+src/shared            IPC contracts and runtime validation
+src/ui                React inbox and annotation editor
+```
+
+`src/main.ts` is the composition root. It creates the dependencies, starts the
+Electron adapters, and owns application shutdown. The React renderer can only
+use the typed API exposed by `src/preload.ts`.
+
 ## Run locally
 
 ```sh
