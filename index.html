@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' screen-me:; img-src 'self' screen-me: data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ws:"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screen Me</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/renderer.tsx"></script>
+  </body>
+</html>
