@@ -18,8 +18,10 @@ A local-first Electron spike for capturing, annotating, and keeping screenshots 
 src/main/application  Capture workflows and capture-change coordination
 src/main/electron     Windows, IPC, shortcuts, screen capture, and protocols
 src/main/infrastructure  SQLite, asset files, and screenshot directory watching
-src/shared            IPC contracts and runtime validation
-src/ui                React inbox and annotation editor
+src/shared/captures   Capture data contracts and validation
+src/shared/ipc        IPC contract and typed preload API
+src/ui/home           Inbox page, capture card, and local inbox state
+src/ui/annotation     Annotation page, toolbar, image helpers, and styles
 ```
 
 `src/main.ts` is the composition root. It creates the dependencies, starts the
