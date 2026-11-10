@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Capture, SaveAnnotationInput } from '../../shared/contracts';
+import type {
+  Capture,
+  SaveAnnotationInput,
+} from '../../shared/captures/contracts';
 import {
   CaptureController,
   type CaptureChangePublisher,

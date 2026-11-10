@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { ScreenMeApi } from './shared/contracts';
-import { channels } from './shared/contracts';
+import type { ScreenMeApi } from './shared/ipc/contracts';
+import { channels } from './shared/ipc/contracts';
 
 const api: ScreenMeApi = {
   getStatus: () => ipcRenderer.invoke(channels.getStatus),

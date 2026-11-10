@@ -1,159 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
+import { Canvas, FabricObject, IText, PencilBrush, Rect } from 'fabric';
+import type { Capture } from '../../shared/captures/contracts';
+import { AnnotationToolbar } from './AnnotationToolbar';
 import {
-  Canvas,
-  FabricObject,
-  IText,
-  PencilBrush,
-  Rect,
-} from 'fabric';
-import styled from 'styled-components';
-import type { Capture } from '../shared/contracts';
-
-type Tool = 'select' | 'pen';
-
-interface SavedAnnotation {
-  width: number;
-  height: number;
-  canvas: Record<string, unknown>;
-}
-
-const Page = styled.main`
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  color: ${({ theme }) => theme.colors.white};
-  background: ${({ theme }) => theme.colors.dark};
-`;
-
-const Toolbar = styled.header`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 68px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(20, 19, 18, 0.96);
-`;
-
-const Brand = styled.div`
-  min-width: 160px;
-  margin-right: 12px;
-
-  strong {
-    display: block;
-    font-size: 14px;
-  }
-
-  span {
-    display: block;
-    overflow: hidden;
-    max-width: 220px;
-    margin-top: 3px;
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 11px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-`;
-
-const ToolButton = styled.button<{ $active?: boolean }>`
-  min-height: 38px;
-  padding: 0 13px;
-  border: 1px solid
-    ${({ $active }) => ($active ? 'rgba(255, 91, 53, 0.9)' : 'rgba(255, 255, 255, 0.15)')};
-  border-radius: ${({ theme }) => theme.radius.small};
-  color: ${({ theme }) => theme.colors.white};
-  background: ${({ $active }) =>
-    $active ? 'rgba(255, 91, 53, 0.18)' : 'rgba(255, 255, 255, 0.05)'};
-  font-size: 12px;
-  font-weight: 750;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.11);
-  }
-`;
-
-const Spacer = styled.div`
-  flex: 1;
-`;
-
-const SaveButton = styled.button`
-  min-height: 40px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 999px;
-  color: ${({ theme }) => theme.colors.white};
-  background: ${({ theme }) => theme.colors.accent};
-  font-size: 13px;
-  font-weight: 850;
-
-  &:disabled {
-    cursor: wait;
-    opacity: 0.55;
-  }
-`;
-
-const Workspace = styled.section`
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-height: 0;
-  padding: 24px;
-  overflow: auto;
-  background:
-    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.08), transparent 42%),
-    #11100f;
-`;
-
-const CanvasFrame = styled.div<{ $width: number; $height: number }>`
-  position: relative;
-  width: ${({ $width }) => $width}px;
-  height: ${({ $height }) => $height}px;
-  overflow: hidden;
-  background: #262320;
-  box-shadow: ${({ theme }) => theme.shadow.floating};
-
-  > img {
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .canvas-container {
-    position: absolute !important;
-    z-index: 1;
-    inset: 0;
-  }
-`;
-
-const Loading = styled.div`
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 14px;
-`;
-
-const ErrorMessage = styled.div`
-  max-width: 560px;
-  padding: 18px 20px;
-  border: 1px solid rgba(255, 91, 53, 0.35);
-  border-radius: ${({ theme }) => theme.radius.medium};
-  color: #ffb8a7;
-  background: rgba(255, 91, 53, 0.08);
-  line-height: 1.5;
-`;
-
-const loadImage = (source: string): Promise<HTMLImageElement> =>
-  new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('The screenshot could not be loaded'));
-    image.crossOrigin = 'anonymous';
-    image.src = source;
-  });
+  CanvasFrame,
+  ErrorMessage,
+  Loading,
+  Page,
+  Workspace,
+} from './annotation.styles';
+import type { SavedAnnotation, Tool } from './annotation.types';
+import {
+  loadImage,
+  renderAnnotatedImage,
+  serializeAnnotation,
+} from './image';
 
 export function AnnotationEditor({ captureId }: { captureId: string }) {
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null);
@@ -323,30 +184,10 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
     try {
       canvas.discardActiveObject();
       canvas.requestRenderAll();
-      const multiplier = image.naturalWidth / canvas.width;
-      const overlayDataUrl = canvas.toDataURL({
-        format: 'png',
-        multiplier,
-      });
-      const overlay = await loadImage(overlayDataUrl);
-      const output = document.createElement('canvas');
-      output.width = image.naturalWidth;
-      output.height = image.naturalHeight;
-      const context = output.getContext('2d');
-      if (!context) {
-        throw new Error('The annotated image could not be rendered');
-      }
-      context.drawImage(image, 0, 0, output.width, output.height);
-      context.drawImage(overlay, 0, 0, output.width, output.height);
-      const saved: SavedAnnotation = {
-        width: canvas.width,
-        height: canvas.height,
-        canvas: canvas.toJSON() as Record<string, unknown>,
-      };
       await window.screenMe.saveAnnotations({
         captureId: capture.id,
-        annotationJson: JSON.stringify(saved),
-        renderedDataUrl: output.toDataURL('image/png'),
+        annotationJson: serializeAnnotation(canvas),
+        renderedDataUrl: await renderAnnotatedImage(canvas, image),
       });
       window.close();
     } catch (reason) {
@@ -372,25 +213,18 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
 
   return (
     <Page>
-      <Toolbar>
-        <Brand>
-          <strong>Annotate capture</strong>
-          <span>{capture?.title ?? 'Loading screenshot…'}</span>
-        </Brand>
-        <ToolButton $active={tool === 'select'} onClick={() => setTool('select')}>
-          Select
-        </ToolButton>
-        <ToolButton $active={tool === 'pen'} onClick={() => setTool('pen')}>
-          Draw
-        </ToolButton>
-        <ToolButton onClick={addRectangle}>Rectangle</ToolButton>
-        <ToolButton onClick={addText}>Text</ToolButton>
-        <ToolButton onClick={removeSelected}>Delete</ToolButton>
-        <Spacer />
-        <SaveButton disabled={saving || !capture} onClick={() => void save()}>
-          {saving ? 'Saving…' : 'Save annotation'}
-        </SaveButton>
-      </Toolbar>
+      <AnnotationToolbar
+        title={capture?.title ?? 'Loading screenshot…'}
+        tool={tool}
+        saving={saving}
+        canSave={Boolean(capture)}
+        selectTool={() => setTool('select')}
+        drawTool={() => setTool('pen')}
+        addRectangle={addRectangle}
+        addText={addText}
+        removeSelected={removeSelected}
+        save={() => void save()}
+      />
       <Workspace>
         {error ? <ErrorMessage>{error}</ErrorMessage> : null}
         {!error && capture && canvasSize.width ? (

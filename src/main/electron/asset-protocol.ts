@@ -1,6 +1,6 @@
 import { pathToFileURL } from 'node:url';
 import { net, protocol } from 'electron';
-import { CaptureIdSchema } from '../../shared/contracts';
+import { CaptureIdSchema } from '../../shared/captures/contracts';
 import { AssetStore } from '../infrastructure/asset-store';
 import { AppDatabase } from '../infrastructure/database';
 

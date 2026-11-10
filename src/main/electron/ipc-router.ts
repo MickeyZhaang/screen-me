@@ -1,10 +1,12 @@
 import { ipcMain } from 'electron';
-import type { AppStatus } from '../../shared/contracts';
 import {
   CaptureIdSchema,
-  channels,
   SaveAnnotationInputSchema,
-} from '../../shared/contracts';
+} from '../../shared/captures/contracts';
+import {
+  channels,
+  type AppStatus,
+} from '../../shared/ipc/contracts';
 import { CaptureController } from '../application/capture-controller';
 
 export class IpcRouter {

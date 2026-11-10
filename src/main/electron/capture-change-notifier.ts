@@ -1,5 +1,5 @@
 import { BrowserWindow } from 'electron';
-import { channels } from '../../shared/contracts';
+import { channels } from '../../shared/ipc/contracts';
 import type { CaptureChangePublisher } from '../application/capture-controller';
 
 export class CaptureChangeNotifier implements CaptureChangePublisher {

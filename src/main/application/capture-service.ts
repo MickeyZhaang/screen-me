@@ -1,5 +1,8 @@
 import { basename } from 'node:path';
-import type { Capture, SaveAnnotationInput } from '../../shared/contracts';
+import type {
+  Capture,
+  SaveAnnotationInput,
+} from '../../shared/captures/contracts';
 import { AssetStore } from '../infrastructure/asset-store';
 import {
   AppDatabase,

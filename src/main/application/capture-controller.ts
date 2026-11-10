@@ -1,4 +1,7 @@
-import type { Capture, SaveAnnotationInput } from '../../shared/contracts';
+import type {
+  Capture,
+  SaveAnnotationInput,
+} from '../../shared/captures/contracts';
 
 export interface CaptureUseCases {
   list(): Capture[];
