@@ -1,6 +1,6 @@
-import { globalShortcut } from 'electron';
+import { globalShortcut } from "electron";
 
-export const captureShortcut = 'CommandOrControl+Shift+2';
+export const captureShortcut = "CommandOrControl+Shift+2";
 
 export class ShortcutManager {
   registered = false;
@@ -8,7 +8,7 @@ export class ShortcutManager {
   start(action: () => Promise<unknown>): void {
     this.registered = globalShortcut.register(captureShortcut, () => {
       void action().catch((error: unknown) => {
-        console.error('Screen capture failed', error);
+        console.error("Screen capture failed", error);
       });
     });
   }

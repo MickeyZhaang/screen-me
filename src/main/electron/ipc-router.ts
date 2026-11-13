@@ -1,16 +1,13 @@
-import { ipcMain, type IpcMainInvokeEvent } from 'electron';
-import { z } from 'zod';
+import { ipcMain, type IpcMainInvokeEvent } from "electron";
+import { z } from "zod";
 import {
   CaptureIdSchema,
   ListCapturesInputSchema,
   SaveAnnotationInputSchema,
-} from '../../shared/captures/contracts';
-import {
-  channels,
-  type AppStatus,
-} from '../../shared/ipc/contracts';
-import { CaptureController } from '../application/capture-controller';
-import { WindowManager } from './window-manager';
+} from "../../shared/captures/contracts";
+import { channels, type AppStatus } from "../../shared/ipc/contracts";
+import { CaptureController } from "../application/capture-controller";
+import { WindowManager } from "./window-manager";
 
 export class IpcRouter {
   constructor(
@@ -29,7 +26,9 @@ export class IpcRouter {
     });
     ipcMain.handle(channels.listCaptures, (event, input: unknown) => {
       this.assertHome(event);
-      return this.captures.list(ListCapturesInputSchema.parse(input ?? {}).offset);
+      return this.captures.list(
+        ListCapturesInputSchema.parse(input ?? {}).offset,
+      );
     });
     ipcMain.handle(channels.getCapture, (event, captureId: unknown) => {
       const id = CaptureIdSchema.parse(captureId);
@@ -80,14 +79,14 @@ export class IpcRouter {
   private assertHome(event: IpcMainInvokeEvent): void {
     this.assertTrusted(event);
     if (!this.windows.isHome(event.sender)) {
-      throw new Error('This action is not available in this window');
+      throw new Error("This action is not available in this window");
     }
   }
 
   private assertAnnotation(event: IpcMainInvokeEvent, captureId: string): void {
     this.assertTrusted(event);
     if (!this.windows.canAccessCapture(event.sender, captureId)) {
-      throw new Error('This capture is not available in this window');
+      throw new Error("This capture is not available in this window");
     }
   }
 
@@ -96,7 +95,7 @@ export class IpcRouter {
       event.senderFrame !== event.sender.mainFrame ||
       !this.windows.isTrusted(event.sender)
     ) {
-      throw new Error('Untrusted IPC sender');
+      throw new Error("Untrusted IPC sender");
     }
   }
 }

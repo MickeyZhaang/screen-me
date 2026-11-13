@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const Page = styled.main`
   display: grid;
@@ -45,11 +45,12 @@ export const ToolButton = styled.button<{ $active?: boolean }>`
   min-height: 38px;
   padding: 0 13px;
   border: 1px solid
-    ${({ $active }) => ($active ? 'rgba(255, 91, 53, 0.9)' : 'rgba(255, 255, 255, 0.15)')};
+    ${({ $active }) =>
+      $active ? "rgba(255, 91, 53, 0.9)" : "rgba(255, 255, 255, 0.15)"};
   border-radius: ${({ theme }) => theme.radius.small};
   color: ${({ theme }) => theme.colors.white};
   background: ${({ $active }) =>
-    $active ? 'rgba(255, 91, 53, 0.18)' : 'rgba(255, 255, 255, 0.05)'};
+    $active ? "rgba(255, 91, 53, 0.18)" : "rgba(255, 255, 255, 0.05)"};
   font-size: 12px;
   font-weight: 750;
 
@@ -86,7 +87,11 @@ export const Workspace = styled.section`
   padding: 24px;
   overflow: auto;
   background:
-    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.08), transparent 42%),
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(255, 255, 255, 0.08),
+      transparent 42%
+    ),
     #11100f;
 `;
 

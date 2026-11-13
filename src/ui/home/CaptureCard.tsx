@@ -1,4 +1,4 @@
-import type { Capture } from '../../shared/captures/contracts';
+import type { Capture } from "../../shared/captures/contracts";
 import {
   Card,
   CardBody,
@@ -6,7 +6,7 @@ import {
   CardTitle,
   DeleteButton,
   PreviewButton,
-} from './home.styles';
+} from "./home.styles";
 
 export function CaptureCard({
   capture,
@@ -28,13 +28,15 @@ export function CaptureCard({
       <CardBody>
         <CardTitle>{capture.title}</CardTitle>
         <CardMeta>
-          <span>{capture.source === 'app' ? 'Screen Me' : 'macOS screenshot'}</span>
+          <span>
+            {capture.source === "app" ? "Screen Me" : "macOS screenshot"}
+          </span>
           <time dateTime={capture.createdAt}>
             {new Date(capture.createdAt).toLocaleString([], {
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit',
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
             })}
           </time>
         </CardMeta>

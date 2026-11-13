@@ -1,10 +1,10 @@
-import { readFile } from 'node:fs/promises';
-import { extname, join, resolve } from 'node:path';
-import { protocol, type ProtocolRequest } from 'electron';
-import { CaptureIdSchema } from '../../shared/captures/contracts';
-import { AssetStore } from '../infrastructure/asset-store';
-import { AppDatabase, type AssetRecord } from '../infrastructure/database';
-import { appOrigin, isAppUrl, rendererOrigin } from './app-origin';
+import { readFile } from "node:fs/promises";
+import { extname, join, resolve } from "node:path";
+import { protocol, type ProtocolRequest } from "electron";
+import { CaptureIdSchema } from "../../shared/captures/contracts";
+import { AssetStore } from "../infrastructure/asset-store";
+import { AppDatabase, type AssetRecord } from "../infrastructure/database";
+import { appOrigin, isAppUrl, rendererOrigin } from "./app-origin";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -12,21 +12,21 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self'",
   "connect-src 'self'",
-].join('; ');
+].join("; ");
 
 const staticContentTypes: Record<string, string> = {
-  '.css': 'text/css',
-  '.html': 'text/html',
-  '.js': 'text/javascript',
-  '.json': 'application/json',
-  '.map': 'application/json',
-  '.svg': 'image/svg+xml',
+  ".css": "text/css",
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".json": "application/json",
+  ".map": "application/json",
+  ".svg": "image/svg+xml",
 };
 
 export const registerAssetScheme = (): void => {
   protocol.registerSchemesAsPrivileged([
     {
-      scheme: 'screen-me',
+      scheme: "screen-me",
       privileges: {
         standard: true,
         secure: true,
@@ -49,25 +49,25 @@ export class AssetProtocol {
   ) {}
 
   start(): void {
-    protocol.handle('screen-me', (request) =>
+    protocol.handle("screen-me", (request) =>
       this.handle(request as Request & ProtocolRequest),
     );
   }
 
   stop(): void {
     this.assetCache.clear();
-    protocol.unhandle('screen-me');
+    protocol.unhandle("screen-me");
   }
 
   private async handle(request: Request & ProtocolRequest): Promise<Response> {
     const url = new URL(request.url);
-    if (!isAppUrl(url) || !['GET', 'HEAD'].includes(request.method)) {
-      return new Response('Not found', { status: 404 });
+    if (!isAppUrl(url) || !["GET", "HEAD"].includes(request.method)) {
+      return new Response("Not found", { status: 404 });
     }
     const captureId = CaptureIdSchema.safeParse(
-      url.pathname.replace(/^\/assets\//, ''),
+      url.pathname.replace(/^\/assets\//, ""),
     );
-    if (url.pathname.startsWith('/assets/') && captureId.success) {
+    if (url.pathname.startsWith("/assets/") && captureId.success) {
       return this.handleAsset(captureId.data, request);
     }
     return this.handleRenderer(url.pathname);
@@ -78,17 +78,18 @@ export class AssetProtocol {
     request: Request & ProtocolRequest,
   ): Promise<Response> {
     if (!this.isTrustedInitiator(request.initiatorOrigin)) {
-      return new Response('Forbidden', { status: 403 });
+      return new Response("Forbidden", { status: 403 });
     }
     try {
-      const asset = this.assetCache.get(assetId) ?? this.database.getAsset(assetId);
+      const asset =
+        this.assetCache.get(assetId) ?? this.database.getAsset(assetId);
       this.assetCache.set(assetId, asset);
-      const headers = new Headers({ 'Content-Type': asset.mediaType });
+      const headers = new Headers({ "Content-Type": asset.mediaType });
       if (request.initiatorOrigin !== appOrigin) {
-        headers.set('Access-Control-Allow-Origin', request.initiatorOrigin);
+        headers.set("Access-Control-Allow-Origin", request.initiatorOrigin);
       }
       return new Response(
-        request.method === 'HEAD'
+        request.method === "HEAD"
           ? null
           : await readFile(this.assets.resolvePath(asset.relativePath)),
         {
@@ -97,34 +98,34 @@ export class AssetProtocol {
         },
       );
     } catch {
-      return new Response('Not found', { status: 404 });
+      return new Response("Not found", { status: 404 });
     }
   }
 
   private async handleRenderer(pathname: string): Promise<Response> {
-    const requestedPath = pathname === '/' ? '/index.html' : pathname;
+    const requestedPath = pathname === "/" ? "/index.html" : pathname;
     const resolvedPath = resolve(this.rendererDirectory, `.${requestedPath}`);
     if (
       !resolvedPath.startsWith(`${this.rendererDirectory}/`) &&
       resolvedPath !== this.rendererDirectory
     ) {
-      return new Response('Not found', { status: 404 });
+      return new Response("Not found", { status: 404 });
     }
     try {
       const headers = new Headers({
-        'Content-Type':
+        "Content-Type":
           staticContentTypes[extname(resolvedPath)] ??
-          'application/octet-stream',
+          "application/octet-stream",
       });
-      if (requestedPath === '/index.html') {
-        headers.set('Content-Security-Policy', contentSecurityPolicy);
+      if (requestedPath === "/index.html") {
+        headers.set("Content-Security-Policy", contentSecurityPolicy);
       }
       return new Response(await readFile(resolvedPath), {
         status: 200,
         headers,
       });
     } catch {
-      return new Response('Not found', { status: 404 });
+      return new Response("Not found", { status: 404 });
     }
   }
 

@@ -1,20 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import { Canvas, FabricObject, IText, PencilBrush, Rect } from 'fabric';
-import type { Capture } from '../../shared/captures/contracts';
-import { AnnotationToolbar } from './AnnotationToolbar';
+import { useEffect, useRef, useState } from "react";
+import { Canvas, FabricObject, IText, PencilBrush, Rect } from "fabric";
+import type { Capture } from "../../shared/captures/contracts";
+import { AnnotationToolbar } from "./AnnotationToolbar";
 import {
   CanvasFrame,
   ErrorMessage,
   Loading,
   Page,
   Workspace,
-} from './annotation.styles';
-import type { SavedAnnotation, Tool } from './annotation.types';
-import {
-  loadImage,
-  renderAnnotatedImage,
-  serializeAnnotation,
-} from './image';
+} from "./annotation.styles";
+import type { SavedAnnotation, Tool } from "./annotation.types";
+import { loadImage, renderAnnotatedImage, serializeAnnotation } from "./image";
 
 export function AnnotationEditor({ captureId }: { captureId: string }) {
   const canvasElementRef = useRef<HTMLCanvasElement | null>(null);
@@ -22,7 +18,7 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
   const sourceImageRef = useRef<HTMLImageElement | null>(null);
   const [capture, setCapture] = useState<Capture | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  const [tool, setTool] = useState<Tool>('select');
+  const [tool, setTool] = useState<Tool>("select");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +27,7 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
     const initialize = async () => {
       const annotation = window.screenMe.annotation;
       if (!annotation) {
-        throw new Error('The annotation API is unavailable in this window');
+        throw new Error("The annotation API is unavailable in this window");
       }
       const nextCapture = await annotation.getCapture(captureId);
       const image = await loadImage(nextCapture.originalImageUrl);
@@ -68,13 +64,13 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
       width: canvasSize.width,
       height: canvasSize.height,
       preserveObjectStacking: true,
-      selectionColor: 'rgba(255, 91, 53, 0.12)',
-      selectionBorderColor: '#ff5b35',
+      selectionColor: "rgba(255, 91, 53, 0.12)",
+      selectionBorderColor: "#ff5b35",
       selectionLineWidth: 2,
     });
     fabricRef.current = canvas;
     canvas.freeDrawingBrush = new PencilBrush(canvas);
-    canvas.freeDrawingBrush.color = '#ff3b24';
+    canvas.freeDrawingBrush.color = "#ff3b24";
     canvas.freeDrawingBrush.width = 4;
     const restore = async () => {
       if (!capture.annotationJson) {
@@ -109,11 +105,11 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
     if (!canvas) {
       return;
     }
-    canvas.isDrawingMode = tool === 'pen';
-    canvas.selection = tool === 'select';
+    canvas.isDrawingMode = tool === "pen";
+    canvas.selection = tool === "select";
     for (const object of canvas.getObjects()) {
-      object.selectable = tool === 'select';
-      object.evented = tool === 'select';
+      object.selectable = tool === "select";
+      object.evented = tool === "select";
     }
     canvas.discardActiveObject();
     canvas.requestRenderAll();
@@ -124,14 +120,14 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
     if (!canvas) {
       return;
     }
-    setTool('select');
+    setTool("select");
     const rectangle = new Rect({
       left: canvas.width / 2 - 100,
       top: canvas.height / 2 - 60,
       width: 200,
       height: 120,
-      fill: 'rgba(255, 59, 36, 0.06)',
-      stroke: '#ff3b24',
+      fill: "rgba(255, 59, 36, 0.06)",
+      stroke: "#ff3b24",
       strokeWidth: 4,
       rx: 8,
       ry: 8,
@@ -146,15 +142,15 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
     if (!canvas) {
       return;
     }
-    setTool('select');
-    const text = new IText('Add a note', {
+    setTool("select");
+    const text = new IText("Add a note", {
       left: canvas.width / 2 - 80,
       top: canvas.height / 2 - 20,
-      fill: '#ff3b24',
-      fontFamily: 'Arial',
+      fill: "#ff3b24",
+      fontFamily: "Arial",
       fontSize: 32,
       fontWeight: 700,
-      backgroundColor: 'rgba(255, 255, 255, 0.86)',
+      backgroundColor: "rgba(255, 255, 255, 0.86)",
       padding: 7,
     });
     canvas.add(text);
@@ -188,7 +184,7 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
     try {
       const annotation = window.screenMe.annotation;
       if (!annotation) {
-        throw new Error('The annotation API is unavailable in this window');
+        throw new Error("The annotation API is unavailable in this window");
       }
       canvas.discardActiveObject();
       canvas.requestRenderAll();
@@ -207,7 +203,7 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Backspace' || event.key === 'Delete') {
+      if (event.key === "Backspace" || event.key === "Delete") {
         const active = fabricRef.current?.getActiveObject();
         if (active && !(active instanceof IText && active.isEditing)) {
           event.preventDefault();
@@ -215,19 +211,19 @@ export function AnnotationEditor({ captureId }: { captureId: string }) {
         }
       }
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
   });
 
   return (
     <Page>
       <AnnotationToolbar
-        title={capture?.title ?? 'Loading screenshot…'}
+        title={capture?.title ?? "Loading screenshot…"}
         tool={tool}
         saving={saving}
         canSave={Boolean(capture)}
-        selectTool={() => setTool('select')}
-        drawTool={() => setTool('pen')}
+        selectTool={() => setTool("select")}
+        drawTool={() => setTool("pen")}
         addRectangle={addRectangle}
         addText={addText}
         removeSelected={removeSelected}

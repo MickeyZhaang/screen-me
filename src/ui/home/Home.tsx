@@ -1,5 +1,5 @@
-import { CaptureCard } from './CaptureCard';
-import { StatusNav } from './components/StatusNav';
+import { CaptureCard } from "./CaptureCard";
+import { StatusNav } from "./components/StatusNav";
 import {
   CaptureButton,
   Empty,
@@ -12,8 +12,8 @@ import {
   Page,
   Title,
   TitleAccent,
-} from './home.styles';
-import { useCaptureInbox } from './useCaptureInbox';
+} from "./home.styles";
+import { useCaptureInbox } from "./useCaptureInbox";
 
 export function Home() {
   const {
@@ -37,16 +37,17 @@ export function Home() {
       />
       <Page>
         <Hero>
-        <div>
-          <Eyebrow>Local screenshot notebook</Eyebrow>
-          <Title>
-            All your captures.<br />
-            <TitleAccent>In one place.</TitleAccent>
-          </Title>
-        </div>
-        <CaptureButton disabled={busy} onClick={() => void capture()}>
-          {busy ? 'Capturing…' : 'New capture'}
-        </CaptureButton>
+          <div>
+            <Eyebrow>Local screenshot notebook</Eyebrow>
+            <Title>
+              All your captures.
+              <br />
+              <TitleAccent>In one place.</TitleAccent>
+            </Title>
+          </div>
+          <CaptureButton disabled={busy} onClick={() => void capture()}>
+            {busy ? "Capturing…" : "New capture"}
+          </CaptureButton>
         </Hero>
 
         {error ? <ErrorBanner>{error}</ErrorBanner> : null}
@@ -54,7 +55,7 @@ export function Home() {
         <InboxHeader>
           <h2>Inbox</h2>
           <p>
-            {captures.length} {captures.length === 1 ? 'capture' : 'captures'}
+            {captures.length} {captures.length === 1 ? "capture" : "captures"}
           </p>
         </InboxHeader>
 
@@ -65,7 +66,9 @@ export function Home() {
                 key={captureItem.id}
                 capture={captureItem}
                 onDelete={(captureId) => {
-                  if (window.confirm('Delete this capture and its local files?')) {
+                  if (
+                    window.confirm("Delete this capture and its local files?")
+                  ) {
                     void remove(captureId);
                   }
                 }}
@@ -80,8 +83,11 @@ export function Home() {
         )}
         {nextOffset !== null ? (
           <More>
-            <CaptureButton disabled={loadingMore} onClick={() => void loadMore()}>
-              {loadingMore ? 'Loading…' : 'Load more'}
+            <CaptureButton
+              disabled={loadingMore}
+              onClick={() => void loadMore()}
+            >
+              {loadingMore ? "Loading…" : "Load more"}
             </CaptureButton>
           </More>
         ) : null}

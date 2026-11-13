@@ -1,11 +1,7 @@
-import { z } from 'zod';
-import {
-  capturePageSize,
-  maxAnnotationBytes,
-  maxImageBytes,
-} from './limits';
+import { z } from "zod";
+import { capturePageSize, maxAnnotationBytes, maxImageBytes } from "./limits";
 
-export const CaptureSourceSchema = z.enum(['app', 'system']);
+export const CaptureSourceSchema = z.enum(["app", "system"]);
 
 export const CaptureSchema = z.object({
   id: z.string(),
@@ -27,7 +23,7 @@ export const SaveAnnotationInputSchema = z.object({
   annotationJson: z.string().min(1).max(maxAnnotationBytes),
   renderedDataUrl: z
     .string()
-    .startsWith('data:image/png;base64,')
+    .startsWith("data:image/png;base64,")
     .max(Math.ceil((maxImageBytes * 4) / 3) + 128),
 });
 

@@ -1,12 +1,12 @@
-import { execFile } from 'node:child_process';
-import { existsSync, watch, type FSWatcher } from 'node:fs';
-import { stat } from 'node:fs/promises';
-import { homedir } from 'node:os';
-import { basename, extname, join, resolve } from 'node:path';
-import { promisify } from 'node:util';
+import { execFile } from "node:child_process";
+import { existsSync, watch, type FSWatcher } from "node:fs";
+import { stat } from "node:fs/promises";
+import { homedir } from "node:os";
+import { basename, extname, join, resolve } from "node:path";
+import { promisify } from "node:util";
 
 const executeFile = promisify(execFile);
-const supportedExtensions = new Set(['.png', '.jpg', '.jpeg', '.webp']);
+const supportedExtensions = new Set([".png", ".jpg", ".jpeg", ".webp"]);
 const maxHandledPaths = 1_000;
 const maxPendingPaths = 100;
 
@@ -99,13 +99,13 @@ export class ScreenshotWatcher {
       return true;
     }
     try {
-      const { stdout } = await executeFile('/usr/bin/mdls', [
-        '-raw',
-        '-name',
-        'kMDItemIsScreenCapture',
+      const { stdout } = await executeFile("/usr/bin/mdls", [
+        "-raw",
+        "-name",
+        "kMDItemIsScreenCapture",
         filePath,
       ]);
-      return stdout.trim() === '1';
+      return stdout.trim() === "1";
     } catch {
       return false;
     }
@@ -113,18 +113,18 @@ export class ScreenshotWatcher {
 
   private async resolveScreenshotDirectory(): Promise<string> {
     try {
-      const { stdout } = await executeFile('/usr/bin/defaults', [
-        'read',
-        'com.apple.screencapture',
-        'location',
+      const { stdout } = await executeFile("/usr/bin/defaults", [
+        "read",
+        "com.apple.screencapture",
+        "location",
       ]);
       const configured = stdout.trim();
       if (configured) {
         return resolve(configured.replace(/^~/, homedir()));
       }
     } catch {
-      return join(homedir(), 'Desktop');
+      return join(homedir(), "Desktop");
     }
-    return join(homedir(), 'Desktop');
+    return join(homedir(), "Desktop");
   }
 }

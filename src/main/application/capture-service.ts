@@ -1,23 +1,24 @@
-import { basename } from 'node:path';
-import { readFile } from 'node:fs/promises';
+import { basename } from "node:path";
+import { readFile } from "node:fs/promises";
 import type {
   Capture,
   CapturePage,
   SaveAnnotationInput,
-} from '../../shared/captures/contracts';
-import { validateAnnotation } from './annotation-validator';
-import { AssetStore } from '../infrastructure/asset-store';
+} from "../../shared/captures/contracts";
+import { validateAnnotation } from "./annotation-validator";
+import { AssetStore } from "../infrastructure/asset-store";
 import {
   AppDatabase,
   type AssetRecord,
   type CaptureRecord,
-} from '../infrastructure/database';
+} from "../infrastructure/database";
 
 export interface ScreenCaptureProvider {
   capturePrimaryDisplay(): Promise<Buffer>;
 }
 
-const assetUrl = (assetId: string): string => `screen-me://app/assets/${assetId}`;
+const assetUrl = (assetId: string): string =>
+  `screen-me://app/assets/${assetId}`;
 
 export class CaptureService {
   constructor(
@@ -42,10 +43,10 @@ export class CaptureService {
     const buffer = await this.screenCapture.capturePrimaryDisplay();
     return this.createCapture({
       title: `Capture ${new Date().toLocaleTimeString([], {
-        hour: 'numeric',
-        minute: '2-digit',
+        hour: "numeric",
+        minute: "2-digit",
       })}`,
-      source: 'app',
+      source: "app",
       buffer,
       writeAsset: () => this.assets.writePng(buffer),
     });
@@ -54,7 +55,7 @@ export class CaptureService {
   async importSystemScreenshot(filePath: string): Promise<Capture> {
     return this.createCapture({
       title: basename(filePath, basename(filePath).match(/\.[^.]+$/)?.[0]),
-      source: 'system',
+      source: "system",
       writeAsset: () => this.assets.importFile(filePath),
     });
   }
@@ -63,10 +64,10 @@ export class CaptureService {
     validateAnnotation(input.annotationJson);
     const encoded = input.renderedDataUrl.replace(
       /^data:image\/png;base64,/,
-      '',
+      "",
     );
     const renderedAsset = await this.assets.writePng(
-      Buffer.from(encoded, 'base64'),
+      Buffer.from(encoded, "base64"),
     );
     try {
       const updated = this.database.updateAnnotations(
@@ -75,7 +76,9 @@ export class CaptureService {
         renderedAsset,
       );
       if (updated.replacedAsset) {
-        await this.assets.remove(updated.replacedAsset.relativePath).catch(() => undefined);
+        await this.assets
+          .remove(updated.replacedAsset.relativePath)
+          .catch(() => undefined);
       }
       return this.toCapture(updated.capture);
     } catch (error) {
@@ -87,19 +90,23 @@ export class CaptureService {
   async delete(captureId: string): Promise<void> {
     const assets = this.database.deleteCapture(captureId);
     await Promise.all(
-      assets.map((asset) => this.assets.remove(asset.relativePath).catch(() => undefined)),
+      assets.map((asset) =>
+        this.assets.remove(asset.relativePath).catch(() => undefined),
+      ),
     );
   }
 
   private async createCapture(input: {
     title: string;
-    source: 'app' | 'system';
+    source: "app" | "system";
     buffer?: Buffer;
     writeAsset(): Promise<AssetRecord>;
   }): Promise<Capture> {
     const asset = await input.writeAsset();
     try {
-      const buffer = input.buffer ?? await readFile(this.assets.resolvePath(asset.relativePath));
+      const buffer =
+        input.buffer ??
+        (await readFile(this.assets.resolvePath(asset.relativePath)));
       const thumbnail = await this.assets.createThumbnail(buffer);
       try {
         return this.toCapture(
@@ -131,7 +138,9 @@ export class CaptureService {
         record.renderedAssetId ?? record.originalAssetId,
       ),
       thumbnailImageUrl: assetUrl(
-        record.thumbnailAssetId ?? record.renderedAssetId ?? record.originalAssetId,
+        record.thumbnailAssetId ??
+          record.renderedAssetId ??
+          record.originalAssetId,
       ),
       annotationJson: record.annotationJson,
       width: record.width,

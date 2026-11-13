@@ -1,12 +1,13 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer } from "electron";
 import type {
   AnnotationApi,
   HomeApi,
   ScreenMeApi,
-} from './shared/ipc/contracts';
-import { channels } from './shared/ipc/contracts';
+} from "./shared/ipc/contracts";
+import { channels } from "./shared/ipc/contracts";
 
-const annotationMode = new URL(window.location.href).searchParams.get('mode') === 'annotation';
+const annotationMode =
+  new URL(window.location.href).searchParams.get("mode") === "annotation";
 
 const home: HomeApi = {
   getStatus: () => ipcRenderer.invoke(channels.getStatus),
@@ -36,4 +37,4 @@ const api: ScreenMeApi = {
   annotation: annotationMode ? annotation : null,
 };
 
-contextBridge.exposeInMainWorld('screenMe', api);
+contextBridge.exposeInMainWorld("screenMe", api);

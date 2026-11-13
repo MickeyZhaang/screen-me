@@ -1,6 +1,6 @@
-import Database from 'better-sqlite3';
-import { randomUUID } from 'node:crypto';
-import { capturePageSize } from '../../shared/captures/limits';
+import Database from "better-sqlite3";
+import { randomUUID } from "node:crypto";
+import { capturePageSize } from "../../shared/captures/limits";
 
 export interface AssetRecord {
   id: string;
@@ -17,7 +17,7 @@ export interface CaptureRecord {
   id: string;
   documentId: string;
   title: string;
-  source: 'app' | 'system';
+  source: "app" | "system";
   originalAssetId: string;
   renderedAssetId: string | null;
   thumbnailAssetId: string | null;
@@ -32,7 +32,7 @@ interface CaptureRow {
   id: string;
   document_id: string;
   title: string;
-  source: 'app' | 'system';
+  source: "app" | "system";
   original_asset_id: string;
   rendered_asset_id: string | null;
   thumbnail_asset_id: string | null;
@@ -56,12 +56,12 @@ interface AssetRow {
 
 export class AppDatabase {
   private readonly connection: Database.Database;
-  readonly inboxDocumentId = 'inbox';
+  readonly inboxDocumentId = "inbox";
 
   constructor(databasePath: string) {
     this.connection = new Database(databasePath);
-    this.connection.pragma('journal_mode = WAL');
-    this.connection.pragma('foreign_keys = ON');
+    this.connection.pragma("journal_mode = WAL");
+    this.connection.pragma("foreign_keys = ON");
     this.migrate();
   }
 
@@ -71,7 +71,7 @@ export class AppDatabase {
 
   createCapture(input: {
     title: string;
-    source: 'app' | 'system';
+    source: "app" | "system";
     asset: AssetRecord;
     thumbnail: AssetRecord;
   }): CaptureRecord {
@@ -103,13 +103,13 @@ export class AppDatabase {
       const position = (
         this.connection
           .prepare(
-            'SELECT COALESCE(MAX(position), -1) + 1 AS position FROM document_blocks WHERE document_id = ?',
+            "SELECT COALESCE(MAX(position), -1) + 1 AS position FROM document_blocks WHERE document_id = ?",
           )
           .get(this.inboxDocumentId) as { position: number }
       ).position;
       this.connection
         .prepare(
-          'INSERT INTO document_blocks (id, document_id, capture_id, position, created_at) VALUES (?, ?, ?, ?, ?)',
+          "INSERT INTO document_blocks (id, document_id, capture_id, position, created_at) VALUES (?, ?, ?, ?, ?)",
         )
         .run(blockId, this.inboxDocumentId, captureId, position, now);
     });
@@ -156,11 +156,13 @@ export class AppDatabase {
       ].filter((assetId): assetId is string => Boolean(assetId));
       const assets = assetIds.map((assetId) => this.getAsset(assetId));
       this.connection
-        .prepare('DELETE FROM document_blocks WHERE capture_id = ?')
+        .prepare("DELETE FROM document_blocks WHERE capture_id = ?")
         .run(captureId);
-      this.connection.prepare('DELETE FROM captures WHERE id = ?').run(captureId);
+      this.connection
+        .prepare("DELETE FROM captures WHERE id = ?")
+        .run(captureId);
       for (const assetId of assetIds) {
-        this.connection.prepare('DELETE FROM assets WHERE id = ?').run(assetId);
+        this.connection.prepare("DELETE FROM assets WHERE id = ?").run(assetId);
       }
       return assets;
     });
@@ -190,27 +192,27 @@ export class AppDatabase {
 
   getCapture(captureId: string): CaptureRecord {
     const row = this.connection
-      .prepare('SELECT * FROM captures WHERE id = ?')
+      .prepare("SELECT * FROM captures WHERE id = ?")
       .get(captureId) as CaptureRow | undefined;
     if (!row) {
-      throw new Error('Capture not found');
+      throw new Error("Capture not found");
     }
     return this.mapCapture(row);
   }
 
   getAsset(assetId: string): AssetRecord {
     const row = this.connection
-      .prepare('SELECT * FROM assets WHERE id = ?')
+      .prepare("SELECT * FROM assets WHERE id = ?")
       .get(assetId) as AssetRow | undefined;
     if (!row) {
-      throw new Error('Asset not found');
+      throw new Error("Asset not found");
     }
     return this.mapAsset(row);
   }
 
   listAssetPaths(): string[] {
     return (
-      this.connection.prepare('SELECT relative_path FROM assets').all() as {
+      this.connection.prepare("SELECT relative_path FROM assets").all() as {
         relative_path: string;
       }[]
     ).map((asset) => asset.relative_path);
@@ -218,9 +220,9 @@ export class AppDatabase {
 
   getScreenshotWatcherEnabled(): boolean {
     const row = this.connection
-      .prepare('SELECT value FROM settings WHERE key = ?')
-      .get('screenshot_watcher_enabled') as { value: string } | undefined;
-    return row?.value === 'true';
+      .prepare("SELECT value FROM settings WHERE key = ?")
+      .get("screenshot_watcher_enabled") as { value: string } | undefined;
+    return row?.value === "true";
   }
 
   setScreenshotWatcherEnabled(enabled: boolean): void {
@@ -229,7 +231,7 @@ export class AppDatabase {
         `INSERT INTO settings (key, value) VALUES (?, ?)
          ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
       )
-      .run('screenshot_watcher_enabled', String(enabled));
+      .run("screenshot_watcher_enabled", String(enabled));
   }
 
   private insertAsset(asset: AssetRecord): void {
@@ -304,21 +306,23 @@ export class AppDatabase {
       ON document_blocks(document_id, position);
     `);
     const captureColumns = this.connection
-      .prepare('PRAGMA table_info(captures)')
+      .prepare("PRAGMA table_info(captures)")
       .all() as { name: string }[];
-    if (!captureColumns.some((column) => column.name === 'thumbnail_asset_id')) {
+    if (
+      !captureColumns.some((column) => column.name === "thumbnail_asset_id")
+    ) {
       this.connection.exec(
-        'ALTER TABLE captures ADD COLUMN thumbnail_asset_id TEXT REFERENCES assets(id)',
+        "ALTER TABLE captures ADD COLUMN thumbnail_asset_id TEXT REFERENCES assets(id)",
       );
     }
-    this.connection.pragma('user_version = 3');
+    this.connection.pragma("user_version = 3");
     const now = new Date().toISOString();
     this.connection
       .prepare(
         `INSERT OR IGNORE INTO documents (id, title, created_at, updated_at)
          VALUES (?, ?, ?, ?)`,
       )
-      .run(this.inboxDocumentId, 'Capture inbox', now, now);
+      .run(this.inboxDocumentId, "Capture inbox", now, now);
   }
 
   private mapCapture(row: CaptureRow): CaptureRecord {

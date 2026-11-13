@@ -14,9 +14,5 @@
     "noEmit": true,
     "types": ["node", "vite/client"]
   },
-  "include": [
-    "src",
-    "forge.config.ts",
-    "vite.*.config.ts"
-  ]
+  "include": ["src", "forge.config.ts", "vite.*.config.ts"]
 }

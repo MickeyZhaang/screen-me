@@ -2,7 +2,7 @@ import type {
   Capture,
   CapturePage,
   SaveAnnotationInput,
-} from '../../shared/captures/contracts';
+} from "../../shared/captures/contracts";
 
 export interface CaptureUseCases {
   list(offset: number): CapturePage;
