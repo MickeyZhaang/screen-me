@@ -4,6 +4,7 @@ import {
   CardBody,
   CardMeta,
   CardTitle,
+  DeleteButton,
   PreviewButton,
 } from './home.styles';
 
@@ -37,9 +38,9 @@ export function CaptureCard({
             })}
           </time>
         </CardMeta>
-        <button type="button" onClick={() => onDelete(capture.id)}>
+        <DeleteButton type="button" onClick={() => onDelete(capture.id)}>
           Delete
-        </button>
+        </DeleteButton>
       </CardBody>
     </Card>
   );
