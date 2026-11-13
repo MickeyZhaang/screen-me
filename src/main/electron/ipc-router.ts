@@ -59,6 +59,18 @@ export class IpcRouter {
         return this.setScreenshotWatcherEnabled(z.boolean().parse(enabled));
       },
     );
+    ipcMain.handle(channels.minimizeWindow, (event) => {
+      this.assertHome(event);
+      this.windows.minimize(event.sender);
+    });
+    ipcMain.handle(channels.toggleMaximizeWindow, (event) => {
+      this.assertHome(event);
+      this.windows.toggleMaximize(event.sender);
+    });
+    ipcMain.handle(channels.closeWindow, (event) => {
+      this.assertHome(event);
+      this.windows.close(event.sender);
+    });
   }
 
   stop(): void {
@@ -71,6 +83,9 @@ export class IpcRouter {
       channels.openAnnotation,
       channels.deleteCapture,
       channels.setScreenshotWatcherEnabled,
+      channels.minimizeWindow,
+      channels.toggleMaximizeWindow,
+      channels.closeWindow,
     ]) {
       ipcMain.removeHandler(channel);
     }

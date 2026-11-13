@@ -18,12 +18,13 @@ export class WindowManager implements AnnotationOpener {
     }
     const window = new BrowserWindow({
       ...this.secureWindowOptions(),
+      frame: false,
       width: 1040,
       height: 760,
       minWidth: 760,
       minHeight: 560,
       title: 'Screen Me',
-      backgroundColor: '#f4f1ea',
+      backgroundColor: '#f6f4f0',
     });
     this.mainWindow = window;
     const contentsId = window.webContents.id;
@@ -85,6 +86,23 @@ export class WindowManager implements AnnotationOpener {
     return isTrustedRendererUrl(contents.getURL());
   }
 
+  minimize(contents: WebContents): void {
+    this.windowFor(contents).minimize();
+  }
+
+  toggleMaximize(contents: WebContents): void {
+    const window = this.windowFor(contents);
+    if (window.isMaximized()) {
+      window.unmaximize();
+      return;
+    }
+    window.maximize();
+  }
+
+  close(contents: WebContents): void {
+    this.windowFor(contents).close();
+  }
+
   private secureWindowOptions() {
     return {
       webPreferences: {
@@ -94,6 +112,14 @@ export class WindowManager implements AnnotationOpener {
         sandbox: true,
       },
     };
+  }
+
+  private windowFor(contents: WebContents): BrowserWindow {
+    const window = BrowserWindow.fromWebContents(contents);
+    if (!window) {
+      throw new Error('Window not found');
+    }
+    return window;
   }
 
   private lockNavigation(window: BrowserWindow): void {

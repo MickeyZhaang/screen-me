@@ -1,196 +1,341 @@
 import styled from 'styled-components';
 
-export const Page = styled.main`
-  width: min(1200px, 100%);
-  margin: 0 auto;
-  padding: clamp(44px, 7vw, 88px) clamp(20px, 4vw, 56px) 80px;
+export const AppFrame = styled.main`
+  display: grid;
+  grid-template-rows: 38px minmax(0, 1fr);
+  min-height: 100vh;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #f6f4f0;
 `;
 
-export const Hero = styled.header`
+export const WindowChrome = styled.header`
   display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 32px;
-  padding-bottom: 48px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.line};
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  -webkit-app-region: drag;
+  background: #292624;
+`;
 
-  @media (max-width: 620px) {
-    align-items: start;
-    flex-direction: column;
+export const WindowControl = styled.button`
+  display: grid;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 0;
+  -webkit-app-region: no-drag;
+  background: transparent;
+
+  img {
+    width: 12px;
+    height: 12px;
   }
 `;
 
-export const Eyebrow = styled.p`
-  margin: 0 0 12px;
-  color: ${({ theme }) => theme.colors.muted};
-  font-size: 12px;
-  font-weight: 750;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+export const WindowTitle = styled.span`
+  color: #b8b2ab;
+  font-size: 13px;
+  font-weight: 600;
 `;
 
-export const Title = styled.h1`
-  max-width: 620px;
-  margin: 0;
-  font-size: clamp(42px, 6vw, 72px);
-  font-weight: 650;
-  letter-spacing: -0.065em;
-  line-height: 0.95;
+export const AppShell = styled.div`
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  min-height: 0;
+
+  @media (max-width: 760px) {
+    grid-template-columns: 184px minmax(0, 1fr);
+  }
 `;
 
-export const TitleAccent = styled.span`
-  color: ${({ theme }) => theme.colors.muted};
+export const Sidebar = styled.aside`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 22px 18px 18px;
+  background: #fdfcfa;
 `;
 
-export const CaptureButton = styled.button`
-  flex: 0 0 auto;
-  min-height: 46px;
-  padding: 0 18px;
+export const Brand = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+export const Mark = styled.span`
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  color: #fff;
+  background: #131210;
+  font-size: 16px;
+  font-weight: 700;
+`;
+
+export const BrandName = styled.span`
+  color: #131210;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+`;
+
+export const LibraryLabel = styled.p`
+  margin: 20px 0 0;
+  color: #6e665c;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+`;
+
+export const LibraryNav = styled.nav`
+  display: grid;
+  gap: 2px;
+`;
+
+export const LibraryItem = styled.button<{ $active?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+  padding: 0 12px;
   border: 0;
   border-radius: 10px;
-  color: ${({ theme }) => theme.colors.white};
-  background: ${({ theme }) => theme.colors.ink};
-  box-shadow: 0 10px 26px rgba(29, 27, 25, 0.16);
+  color: ${({ $active }) => ($active ? '#131210' : '#6e665c')};
+  background: ${({ $active }) => ($active ? '#e8e3d9' : 'transparent')};
   font-size: 14px;
-  font-weight: 750;
-  transition:
-    background 160ms ease,
-    transform 160ms ease;
+  font-weight: ${({ $active }) => ($active ? 600 : 500)};
+  text-align: left;
 
-  &:hover:not(:disabled) {
-    background: #000;
-    transform: translateY(-1px);
+  &:not(:disabled):hover {
+    background: #f1eee8;
   }
 
   &:disabled {
-    cursor: wait;
-    opacity: 0.55;
+    cursor: default;
   }
 `;
 
-export const InboxHeader = styled.div`
+export const NavLabel = styled.span`
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 34px 0 18px;
+  align-items: center;
+  gap: 10px;
+`;
 
-  h2 {
-    margin: 0;
-    font-size: 18px;
-    letter-spacing: -0.035em;
-  }
+export const NavDot = styled.img`
+  width: 8px;
+  height: 8px;
+`;
+
+export const Count = styled.span`
+  color: #6e665c;
+  font-size: 12px;
+  font-weight: 500;
+`;
+
+export const SidebarStatus = styled.div`
+  display: grid;
+  gap: 8px;
+  margin-top: auto;
+  color: #6e665c;
+  font-size: 12px;
 
   p {
     margin: 0;
-    color: ${({ theme }) => theme.colors.muted};
+  }
+`;
+
+export const ScreenStatus = styled.p<{ $granted: boolean }>`
+  color: ${({ $granted }) => ($granted ? '#1a754d' : '#8b6414')};
+`;
+
+export const MainContent = styled.section`
+  display: grid;
+  grid-template-rows: 77px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  background: #fff;
+`;
+
+export const Toolbar = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 28px;
+  border-bottom: 1px solid #dbd6cc;
+  background: #f6f4f0;
+`;
+
+export const ToolbarTitle = styled.div`
+  h1 {
+    margin: 0;
+    color: #131210;
+    font-size: 28px;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+  }
+
+  p {
+    margin: 2px 0 0;
+    color: #6e665c;
     font-size: 13px;
   }
 `;
 
-export const ErrorBanner = styled.div`
-  margin-top: 22px;
-  padding: 13px 15px;
-  border: 1px solid rgba(166, 60, 49, 0.25);
-  border-radius: ${({ theme }) => theme.radius.medium};
-  color: ${({ theme }) => theme.colors.error};
-  background: rgba(255, 244, 241, 0.9);
-  font-size: 14px;
-`;
-
-export const Grid = styled.section`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 14px;
-`;
-
-export const Card = styled.article`
-  overflow: hidden;
-  border: 1px solid ${({ theme }) => theme.colors.line};
-  border-radius: 14px;
-  background: ${({ theme }) => theme.colors.surface};
-  transition:
-    box-shadow 160ms ease,
-    transform 160ms ease;
-
-  &:hover {
-    box-shadow: ${({ theme }) => theme.shadow.card};
-    transform: translateY(-2px);
-  }
-`;
-
-export const PreviewButton = styled.button`
-  display: block;
-  width: 100%;
-  height: 184px;
-  padding: 0;
-  border: 0;
-  background: #e8e4dd;
-
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-export const CardBody = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  padding: 14px;
-`;
-
-export const CardTitle = styled.h2`
-  overflow: hidden;
-  margin: 0 0 6px;
-  font-size: 14px;
-  letter-spacing: -0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-export const CardMeta = styled.div`
+export const ToolbarActions = styled.div`
   display: flex;
-  gap: 8px;
-  color: ${({ theme }) => theme.colors.muted};
-  font-size: 12px;
+  align-items: center;
+  gap: 10px;
 `;
 
-export const DeleteButton = styled.button`
-  align-self: center;
-  padding: 5px 0;
-  border: 0;
-  color: ${({ theme }) => theme.colors.muted};
-  background: transparent;
-  font-size: 12px;
+export const WatcherButton = styled.button<{ $enabled: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #dbd6cc;
+  border-radius: 10px;
+  color: #6e665c;
+  background: #fff;
+  font-size: 13px;
 
-  &:hover {
-    color: ${({ theme }) => theme.colors.error};
+  &::before {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: ${({ $enabled }) => ($enabled ? '#1a754d' : '#8b8278')};
+    content: '';
   }
 `;
 
-export const Empty = styled.section`
+export const CaptureButton = styled.button`
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 11px;
+  color: #fff;
+  background: #131210;
+  font-size: 13px;
+  font-weight: 600;
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.6;
+  }
+`;
+
+export const Canvas = styled.section`
   display: grid;
-  min-height: 260px;
-  place-items: center;
-  padding: 36px;
-  border: 1px dashed ${({ theme }) => theme.colors.line};
-  border-radius: 14px;
-  color: ${({ theme }) => theme.colors.muted};
-  text-align: center;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 24px;
+  min-height: 0;
+  padding: 28px;
+`;
+
+export const HelperRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: #6e665c;
+  font-size: 13px;
+
+  p {
+    margin: 0;
+  }
 
   strong {
-    display: block;
-    margin-bottom: 8px;
-    color: ${({ theme }) => theme.colors.ink};
-    font-size: 17px;
+    color: #131210;
+    font-weight: 500;
   }
 `;
 
-export const More = styled.div`
+export const CaptureGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  align-content: start;
+  gap: 16px;
+  overflow: auto;
+  min-height: 0;
+`;
+
+export const EmptyState = styled.section`
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  padding: 28px;
+  border: 1px dashed #dbd6cc;
+  border-radius: 16px;
+  background: #fdfcfa;
+  text-align: center;
+`;
+
+export const EmptyContent = styled.div`
+  max-width: 430px;
+
+  h2 {
+    margin: 12px 0 8px;
+    color: #131210;
+    font-size: 20px;
+  }
+
+  p {
+    margin: 0;
+    color: #6e665c;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+`;
+
+export const EmptyIcon = styled.div`
+  display: grid;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  place-items: center;
+  border-radius: 18px;
+  background: #e8e3d9;
+
+  span {
+    width: 30px;
+    height: 22px;
+    border: 2px solid #131210;
+    border-radius: 5px;
+  }
+`;
+
+export const EmptyActions = styled.div`
   display: flex;
   justify-content: center;
-  margin-top: 26px;
+  gap: 10px;
+  margin-top: 16px;
+`;
+
+export const SecondaryButton = styled.button`
+  min-height: 36px;
+  padding: 0 15px;
+  border: 1px solid #dbd6cc;
+  border-radius: 10px;
+  color: #131210;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+`;
+
+export const ErrorBanner = styled.div`
+  position: absolute;
+  right: 28px;
+  bottom: 28px;
+  max-width: 420px;
+  padding: 12px 14px;
+  border: 1px solid rgba(166, 60, 49, 0.25);
+  border-radius: 10px;
+  color: #a63c31;
+  background: #fff4f1;
+  font-size: 13px;
 `;
