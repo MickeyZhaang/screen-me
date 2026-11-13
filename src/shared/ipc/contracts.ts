@@ -26,9 +26,6 @@ export const channels = {
   openAnnotation: 'captures:open-annotation',
   deleteCapture: 'captures:delete',
   setScreenshotWatcherEnabled: 'app:set-screenshot-watcher-enabled',
-  minimizeWindow: 'window:minimize',
-  toggleMaximizeWindow: 'window:toggle-maximize',
-  closeWindow: 'window:close',
   capturesChanged: 'captures:changed',
 } as const;
 
@@ -39,9 +36,6 @@ export interface HomeApi {
   openAnnotation(captureId: string): Promise<void>;
   deleteCapture(captureId: string): Promise<void>;
   setScreenshotWatcherEnabled(enabled: boolean): Promise<AppStatus>;
-  minimizeWindow(): Promise<void>;
-  toggleMaximizeWindow(): Promise<void>;
-  closeWindow(): Promise<void>;
   onCapturesChanged(listener: () => void): () => void;
 }
 

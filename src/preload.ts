@@ -19,9 +19,6 @@ const home: HomeApi = {
     ipcRenderer.invoke(channels.deleteCapture, captureId),
   setScreenshotWatcherEnabled: (enabled) =>
     ipcRenderer.invoke(channels.setScreenshotWatcherEnabled, enabled),
-  minimizeWindow: () => ipcRenderer.invoke(channels.minimizeWindow),
-  toggleMaximizeWindow: () => ipcRenderer.invoke(channels.toggleMaximizeWindow),
-  closeWindow: () => ipcRenderer.invoke(channels.closeWindow),
   onCapturesChanged: (listener) => {
     const handler = () => listener();
     ipcRenderer.on(channels.capturesChanged, handler);

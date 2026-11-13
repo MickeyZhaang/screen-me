@@ -1,48 +1,15 @@
 import styled from 'styled-components';
 
 export const AppFrame = styled.main`
-  display: grid;
-  grid-template-rows: 38px minmax(0, 1fr);
   min-height: 100vh;
   overflow: hidden;
-  border-radius: 22px;
   background: #f6f4f0;
-`;
-
-export const WindowChrome = styled.header`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 16px;
-  -webkit-app-region: drag;
-  background: #292624;
-`;
-
-export const WindowControl = styled.button`
-  display: grid;
-  width: 12px;
-  height: 12px;
-  padding: 0;
-  border: 0;
-  -webkit-app-region: no-drag;
-  background: transparent;
-
-  img {
-    width: 12px;
-    height: 12px;
-  }
-`;
-
-export const WindowTitle = styled.span`
-  color: #b8b2ab;
-  font-size: 13px;
-  font-weight: 600;
 `;
 
 export const AppShell = styled.div`
   display: grid;
   grid-template-columns: 236px minmax(0, 1fr);
-  min-height: 0;
+  min-height: 100vh;
 
   @media (max-width: 760px) {
     grid-template-columns: 184px minmax(0, 1fr);

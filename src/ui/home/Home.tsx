@@ -1,8 +1,5 @@
-import closeIcon from '../assets/figma/window-close.svg';
 import inboxDot from '../assets/figma/inbox-dot.svg';
-import minimizeIcon from '../assets/figma/window-minimize.svg';
 import navigationDot from '../assets/figma/navigation-dot.svg';
-import zoomIcon from '../assets/figma/window-zoom.svg';
 import { CaptureCard } from './CaptureCard';
 import {
   AppFrame,
@@ -34,9 +31,6 @@ import {
   ToolbarActions,
   ToolbarTitle,
   WatcherButton,
-  WindowChrome,
-  WindowControl,
-  WindowTitle,
 } from './home.styles';
 import { useCaptureInbox } from './useCaptureInbox';
 
@@ -50,33 +44,11 @@ export function Home() {
     remove,
     setScreenshotWatcherEnabled,
   } = useCaptureInbox();
-  const home = window.screenMe.home;
   const screenAccessGranted = status?.screenPermission === 'granted';
   const watcherEnabled = status?.screenshotWatcherEnabled ?? false;
 
   return (
     <AppFrame>
-      <WindowChrome>
-        <WindowControl
-          aria-label="Close window"
-          onClick={() => void home?.closeWindow()}
-        >
-          <img src={closeIcon} alt="" />
-        </WindowControl>
-        <WindowControl
-          aria-label="Minimize window"
-          onClick={() => void home?.minimizeWindow()}
-        >
-          <img src={minimizeIcon} alt="" />
-        </WindowControl>
-        <WindowControl
-          aria-label="Maximize window"
-          onClick={() => void home?.toggleMaximizeWindow()}
-        >
-          <img src={zoomIcon} alt="" />
-        </WindowControl>
-        <WindowTitle>Screen Me</WindowTitle>
-      </WindowChrome>
       <AppShell>
         <Sidebar>
           <Brand>
