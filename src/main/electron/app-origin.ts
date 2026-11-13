@@ -1,7 +1,7 @@
-export const appOrigin = "screen-me://app";
+export const appOrigin = 'screen-me://app';
 
 export const isAppUrl = (url: URL): boolean =>
-  url.protocol === "screen-me:" && url.host === "app";
+  url.protocol === 'screen-me:' && url.host === 'app';
 
 export const rendererOrigin = (): string =>
   MAIN_WINDOW_VITE_DEV_SERVER_URL

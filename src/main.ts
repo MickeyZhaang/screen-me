@@ -1,32 +1,32 @@
-import { join } from "node:path";
-import { app, systemPreferences } from "electron";
-import { CaptureController } from "./main/application/capture-controller";
-import { CaptureService } from "./main/application/capture-service";
+import { join } from 'node:path';
+import { app, systemPreferences } from 'electron';
+import { CaptureController } from './main/application/capture-controller';
+import { CaptureService } from './main/application/capture-service';
 import {
   AssetProtocol,
   registerAssetScheme,
-} from "./main/electron/asset-protocol";
-import { CaptureChangeNotifier } from "./main/electron/capture-change-notifier";
-import { DesktopCaptureProvider } from "./main/electron/desktop-capture-provider";
-import { IpcRouter } from "./main/electron/ipc-router";
+} from './main/electron/asset-protocol';
+import { CaptureChangeNotifier } from './main/electron/capture-change-notifier';
+import { DesktopCaptureProvider } from './main/electron/desktop-capture-provider';
+import { IpcRouter } from './main/electron/ipc-router';
 import {
   captureShortcut,
   ShortcutManager,
-} from "./main/electron/shortcut-manager";
-import { configureSessionSecurity } from "./main/electron/session-security";
-import { WindowManager } from "./main/electron/window-manager";
-import { AssetStore } from "./main/infrastructure/asset-store";
-import { AppDatabase } from "./main/infrastructure/database";
-import { ScreenshotWatcher } from "./main/infrastructure/screenshot-watcher";
+} from './main/electron/shortcut-manager';
+import { configureSessionSecurity } from './main/electron/session-security';
+import { WindowManager } from './main/electron/window-manager';
+import { AssetStore } from './main/infrastructure/asset-store';
+import { AppDatabase } from './main/infrastructure/database';
+import { ScreenshotWatcher } from './main/infrastructure/screenshot-watcher';
 
 registerAssetScheme();
 
 let stopApplication: (() => void) | undefined;
 
 const startApplication = async (): Promise<void> => {
-  const dataDirectory = app.getPath("userData");
-  const database = new AppDatabase(join(dataDirectory, "screen-me.sqlite"));
-  const assets = new AssetStore(join(dataDirectory, "assets"));
+  const dataDirectory = app.getPath('userData');
+  const database = new AppDatabase(join(dataDirectory, 'screen-me.sqlite'));
+  const assets = new AssetStore(join(dataDirectory, 'assets'));
   const windows = new WindowManager();
   const captureService = new CaptureService(
     database,
@@ -50,9 +50,9 @@ const startApplication = async (): Promise<void> => {
     screenshotWatcherRunning: screenshotWatcher.running,
     screenshotWatcherEnabled: database.getScreenshotWatcherEnabled(),
     screenPermission:
-      process.platform === "darwin"
-        ? systemPreferences.getMediaAccessStatus("screen")
-        : "unknown",
+      process.platform === 'darwin'
+        ? systemPreferences.getMediaAccessStatus('screen')
+        : 'unknown',
   });
   const setScreenshotWatcherEnabled = async (enabled: boolean) => {
     if (enabled) {
@@ -81,7 +81,7 @@ const startApplication = async (): Promise<void> => {
   shortcuts.start(() => captures.capturePrimaryDisplay());
   await windows.openMain();
 
-  app.on("activate", () => {
+  app.on('activate', () => {
     void windows.openMain();
   });
 
@@ -98,17 +98,17 @@ void app
   .whenReady()
   .then(startApplication)
   .catch((error: unknown) => {
-    console.error("Screen Me failed to start", error);
+    console.error('Screen Me failed to start', error);
     app.quit();
   });
 
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-app.on("before-quit", () => {
+app.on('before-quit', () => {
   stopApplication?.();
   stopApplication = undefined;
 });

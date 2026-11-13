@@ -1,9 +1,9 @@
-import { join } from "node:path";
-import { BrowserWindow, screen, type WebContents } from "electron";
-import type { AnnotationOpener } from "../application/capture-controller";
-import { appOrigin, isTrustedRendererUrl } from "./app-origin";
+import { join } from 'node:path';
+import { BrowserWindow, screen, type WebContents } from 'electron';
+import type { AnnotationOpener } from '../application/capture-controller';
+import { appOrigin, isTrustedRendererUrl } from './app-origin';
 
-type WindowRole = { kind: "home" } | { kind: "annotation"; captureId: string };
+type WindowRole = { kind: 'home' } | { kind: 'annotation'; captureId: string };
 
 export class WindowManager implements AnnotationOpener {
   private mainWindow: BrowserWindow | null = null;
@@ -22,14 +22,14 @@ export class WindowManager implements AnnotationOpener {
       height: 760,
       minWidth: 760,
       minHeight: 560,
-      title: "Screen Me",
-      backgroundColor: "#f4f1ea",
+      title: 'Screen Me',
+      backgroundColor: '#f4f1ea',
     });
     this.mainWindow = window;
     const contentsId = window.webContents.id;
-    this.roles.set(contentsId, { kind: "home" });
+    this.roles.set(contentsId, { kind: 'home' });
     this.lockNavigation(window);
-    window.on("closed", () => {
+    window.on('closed', () => {
       if (this.mainWindow === window) {
         this.mainWindow = null;
       }
@@ -55,30 +55,30 @@ export class WindowManager implements AnnotationOpener {
       minWidth: 760,
       minHeight: 600,
       title: `Annotate ${captureId}`,
-      backgroundColor: "#151515",
+      backgroundColor: '#151515',
       show: false,
     });
     this.annotationWindows.set(captureId, window);
     const contentsId = window.webContents.id;
-    this.roles.set(contentsId, { kind: "annotation", captureId });
+    this.roles.set(contentsId, { kind: 'annotation', captureId });
     this.lockNavigation(window);
-    window.on("closed", () => {
+    window.on('closed', () => {
       if (this.annotationWindows.get(captureId) === window) {
         this.annotationWindows.delete(captureId);
       }
       this.roles.delete(contentsId);
     });
-    await this.loadRenderer(window, { mode: "annotation", captureId });
+    await this.loadRenderer(window, { mode: 'annotation', captureId });
     window.show();
   }
 
   isHome(contents: WebContents): boolean {
-    return this.roles.get(contents.id)?.kind === "home";
+    return this.roles.get(contents.id)?.kind === 'home';
   }
 
   canAccessCapture(contents: WebContents, captureId: string): boolean {
     const role = this.roles.get(contents.id);
-    return role?.kind === "annotation" && role.captureId === captureId;
+    return role?.kind === 'annotation' && role.captureId === captureId;
   }
 
   isTrusted(contents: WebContents): boolean {
@@ -88,7 +88,7 @@ export class WindowManager implements AnnotationOpener {
   private secureWindowOptions() {
     return {
       webPreferences: {
-        preload: join(__dirname, "preload.cjs"),
+        preload: join(__dirname, 'preload.cjs'),
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: true,
@@ -97,8 +97,8 @@ export class WindowManager implements AnnotationOpener {
   }
 
   private lockNavigation(window: BrowserWindow): void {
-    window.webContents.on("will-navigate", (event) => event.preventDefault());
-    window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    window.webContents.on('will-navigate', (event) => event.preventDefault());
+    window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   }
 
   private async loadRenderer(

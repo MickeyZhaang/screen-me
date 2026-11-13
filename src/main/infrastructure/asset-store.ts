@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomUUID } from 'node:crypto';
 import {
   mkdir,
   readFile,
@@ -7,21 +7,21 @@ import {
   rm,
   stat,
   writeFile,
-} from "node:fs/promises";
-import { basename, extname, join } from "node:path";
-import { nativeImage } from "electron";
+} from 'node:fs/promises';
+import { basename, extname, join } from 'node:path';
+import { nativeImage } from 'electron';
 import {
   maxImageBytes,
   maxImagePixels,
   thumbnailWidth,
-} from "../../shared/captures/limits";
-import type { AssetRecord } from "./database";
+} from '../../shared/captures/limits';
+import type { AssetRecord } from './database';
 
 const mediaTypes: Record<string, string> = {
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".webp": "image/webp",
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
 };
 
 export class AssetStore {
@@ -35,7 +35,7 @@ export class AssetStore {
     const extension = extname(filePath).toLowerCase();
     const mediaType = mediaTypes[extension];
     if (!mediaType) {
-      throw new Error("Unsupported screenshot format");
+      throw new Error('Unsupported screenshot format');
     }
     const fileStat = await stat(filePath);
     this.assertByteSize(fileStat.size);
@@ -43,7 +43,7 @@ export class AssetStore {
   }
 
   async writePng(buffer: Buffer): Promise<AssetRecord> {
-    return this.writeBuffer(buffer, ".png", "image/png");
+    return this.writeBuffer(buffer, '.png', 'image/png');
   }
 
   async createThumbnail(buffer: Buffer): Promise<AssetRecord> {
@@ -75,7 +75,7 @@ export class AssetStore {
 
   resolvePath(relativePath: string): string {
     if (basename(relativePath) !== relativePath) {
-      throw new Error("Invalid asset path");
+      throw new Error('Invalid asset path');
     }
     return join(this.rootDirectory, relativePath);
   }
@@ -111,7 +111,7 @@ export class AssetStore {
     const image = nativeImage.createFromBuffer(buffer);
     const size = image.getSize();
     if (image.isEmpty()) {
-      throw new Error("The captured image could not be decoded");
+      throw new Error('The captured image could not be decoded');
     }
     this.assertImageSize(size.width, size.height);
     return {
@@ -121,20 +121,20 @@ export class AssetStore {
       width: size.width,
       height: size.height,
       byteSize: buffer.byteLength,
-      sha256: createHash("sha256").update(buffer).digest("hex"),
+      sha256: createHash('sha256').update(buffer).digest('hex'),
       createdAt: new Date().toISOString(),
     };
   }
 
   private assertByteSize(byteSize: number): void {
     if (byteSize > maxImageBytes) {
-      throw new Error("The image exceeds the maximum file size");
+      throw new Error('The image exceeds the maximum file size');
     }
   }
 
   private assertImageSize(width: number, height: number): void {
     if (width <= 0 || height <= 0 || width * height > maxImagePixels) {
-      throw new Error("The image exceeds the maximum dimensions");
+      throw new Error('The image exceeds the maximum dimensions');
     }
   }
 }

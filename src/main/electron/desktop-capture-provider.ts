@@ -3,8 +3,8 @@ import {
   desktopCapturer,
   screen,
   type DesktopCapturerSource,
-} from "electron";
-import type { ScreenCaptureProvider } from "../application/capture-service";
+} from 'electron';
+import type { ScreenCaptureProvider } from '../application/capture-service';
 
 export class DesktopCaptureProvider implements ScreenCaptureProvider {
   async capturePrimaryDisplay(): Promise<Buffer> {
@@ -22,13 +22,13 @@ export class DesktopCaptureProvider implements ScreenCaptureProvider {
         height: Math.round(display.size.height * display.scaleFactor),
       };
       const sources = await desktopCapturer.getSources({
-        types: ["screen"],
+        types: ['screen'],
         thumbnailSize,
       });
       const source = this.pickSource(sources, display.id);
       if (!source || source.thumbnail.isEmpty()) {
         throw new Error(
-          "Screen capture is unavailable. Allow Screen Me in System Settings → Privacy & Security → Screen & System Audio Recording.",
+          'Screen capture is unavailable. Allow Screen Me in System Settings → Privacy & Security → Screen & System Audio Recording.',
         );
       }
       return source.thumbnail.toPNG();

@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Nav = styled.nav`
   display: flex;
@@ -42,7 +42,7 @@ export const Statuses = styled.div`
   }
 `;
 
-export const Status = styled.div<{ $tone: "good" | "warning" }>`
+export const Status = styled.div<{ $tone: 'good' | 'warning' }>`
   display: flex;
   align-items: center;
   gap: 7px;
@@ -64,12 +64,12 @@ export const Status = styled.div<{ $tone: "good" | "warning" }>`
   }
 `;
 
-export const Dot = styled.span<{ $tone: "good" | "warning" }>`
+export const Dot = styled.span<{ $tone: 'good' | 'warning' }>`
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: ${({ theme, $tone }) =>
-    $tone === "good" ? theme.colors.success : theme.colors.warning};
+    $tone === 'good' ? theme.colors.success : theme.colors.warning};
 `;
 
 export const WatcherLabel = styled.label`
@@ -95,7 +95,7 @@ export const Watcher = styled.input`
     margin: 2px;
     border-radius: 50%;
     background: ${({ theme }) => theme.colors.white};
-    content: "";
+    content: '';
     transition: transform 160ms ease;
   }
 

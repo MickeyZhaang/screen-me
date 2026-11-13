@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import type { Capture } from "../../shared/captures/contracts";
-import type { AppStatus } from "../../shared/ipc/contracts";
+import { useCallback, useEffect, useState } from 'react';
+import type { Capture } from '../../shared/captures/contracts';
+import type { AppStatus } from '../../shared/ipc/contracts';
 
 export const useCaptureInbox = () => {
   const [captures, setCaptures] = useState<Capture[]>([]);
@@ -13,7 +13,7 @@ export const useCaptureInbox = () => {
   const refresh = useCallback(async () => {
     const home = window.screenMe.home;
     if (!home) {
-      throw new Error("The inbox API is unavailable in this window");
+      throw new Error('The inbox API is unavailable in this window');
     }
     const [nextCaptures, nextStatus] = await Promise.all([
       home.listCaptures(),
@@ -27,7 +27,7 @@ export const useCaptureInbox = () => {
   useEffect(() => {
     const home = window.screenMe.home;
     if (!home) {
-      setError("The inbox API is unavailable in this window");
+      setError('The inbox API is unavailable in this window');
       return;
     }
     void refresh().catch((reason: unknown) =>
@@ -41,7 +41,7 @@ export const useCaptureInbox = () => {
   const capture = async () => {
     const home = window.screenMe.home;
     if (!home) {
-      setError("The inbox API is unavailable in this window");
+      setError('The inbox API is unavailable in this window');
       return;
     }
     setBusy(true);
@@ -77,7 +77,7 @@ export const useCaptureInbox = () => {
   const remove = async (captureId: string) => {
     const home = window.screenMe.home;
     if (!home) {
-      setError("The inbox API is unavailable in this window");
+      setError('The inbox API is unavailable in this window');
       return;
     }
     setBusy(true);
@@ -95,7 +95,7 @@ export const useCaptureInbox = () => {
   const setScreenshotWatcherEnabled = async (enabled: boolean) => {
     const home = window.screenMe.home;
     if (!home) {
-      setError("The inbox API is unavailable in this window");
+      setError('The inbox API is unavailable in this window');
       return;
     }
     setError(null);

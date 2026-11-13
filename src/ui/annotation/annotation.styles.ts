@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Page = styled.main`
   display: grid;
@@ -46,11 +46,11 @@ export const ToolButton = styled.button<{ $active?: boolean }>`
   padding: 0 13px;
   border: 1px solid
     ${({ $active }) =>
-      $active ? "rgba(255, 91, 53, 0.9)" : "rgba(255, 255, 255, 0.15)"};
+      $active ? 'rgba(255, 91, 53, 0.9)' : 'rgba(255, 255, 255, 0.15)'};
   border-radius: ${({ theme }) => theme.radius.small};
   color: ${({ theme }) => theme.colors.white};
   background: ${({ $active }) =>
-    $active ? "rgba(255, 91, 53, 0.18)" : "rgba(255, 255, 255, 0.05)"};
+    $active ? 'rgba(255, 91, 53, 0.18)' : 'rgba(255, 255, 255, 0.05)'};
   font-size: 12px;
   font-weight: 750;
 

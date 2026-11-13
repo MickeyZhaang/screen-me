@@ -1,4 +1,4 @@
-import type { ScreenMeApi } from "./shared/ipc/contracts";
+import type { ScreenMeApi } from './shared/ipc/contracts';
 
 declare global {
   interface Window {

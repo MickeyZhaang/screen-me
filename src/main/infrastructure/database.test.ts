@@ -1,19 +1,19 @@
-import { mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
-import { AppDatabase, type AssetRecord } from "./database";
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, describe, expect, it } from 'vitest';
+import { AppDatabase, type AssetRecord } from './database';
 
 const directories: string[] = [];
 
 const createAsset = (id: string): AssetRecord => ({
   id,
   relativePath: `${id}.png`,
-  mediaType: "image/png",
+  mediaType: 'image/png',
   width: 1280,
   height: 720,
   byteSize: 2048,
-  sha256: id.padEnd(64, "0"),
+  sha256: id.padEnd(64, '0'),
   createdAt: new Date().toISOString(),
 });
 
@@ -25,23 +25,23 @@ afterEach(async () => {
   );
 });
 
-describe("AppDatabase", () => {
-  it("persists captures in newest-first document order", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "screen-me-test-"));
+describe('AppDatabase', () => {
+  it('persists captures in newest-first document order', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'screen-me-test-'));
     directories.push(directory);
-    const database = new AppDatabase(join(directory, "test.sqlite"));
+    const database = new AppDatabase(join(directory, 'test.sqlite'));
 
     const first = database.createCapture({
-      title: "First capture",
-      source: "app",
-      asset: createAsset("first"),
-      thumbnail: createAsset("first-thumbnail"),
+      title: 'First capture',
+      source: 'app',
+      asset: createAsset('first'),
+      thumbnail: createAsset('first-thumbnail'),
     });
     const second = database.createCapture({
-      title: "Second capture",
-      source: "system",
-      asset: createAsset("second"),
-      thumbnail: createAsset("second-thumbnail"),
+      title: 'Second capture',
+      source: 'system',
+      asset: createAsset('second'),
+      thumbnail: createAsset('second-thumbnail'),
     });
 
     expect(
@@ -50,42 +50,42 @@ describe("AppDatabase", () => {
     database.close();
   });
 
-  it("stores editable annotations and a rendered asset atomically", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "screen-me-test-"));
+  it('stores editable annotations and a rendered asset atomically', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'screen-me-test-'));
     directories.push(directory);
-    const database = new AppDatabase(join(directory, "test.sqlite"));
+    const database = new AppDatabase(join(directory, 'test.sqlite'));
     const capture = database.createCapture({
-      title: "Annotated capture",
-      source: "app",
-      asset: createAsset("original"),
-      thumbnail: createAsset("thumbnail"),
+      title: 'Annotated capture',
+      source: 'app',
+      asset: createAsset('original'),
+      thumbnail: createAsset('thumbnail'),
     });
 
     const updated = database.updateAnnotations(
       capture.id,
       '{"objects":[]}',
-      createAsset("rendered"),
+      createAsset('rendered'),
     );
 
     expect(updated.capture.annotationJson).toBe('{"objects":[]}');
-    expect(updated.capture.renderedAssetId).toBe("rendered");
+    expect(updated.capture.renderedAssetId).toBe('rendered');
     database.close();
   });
 
-  it("deletes a capture with all of its assets", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "screen-me-test-"));
+  it('deletes a capture with all of its assets', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'screen-me-test-'));
     directories.push(directory);
-    const database = new AppDatabase(join(directory, "test.sqlite"));
+    const database = new AppDatabase(join(directory, 'test.sqlite'));
     const capture = database.createCapture({
-      title: "Deletable capture",
-      source: "app",
-      asset: createAsset("original"),
-      thumbnail: createAsset("thumbnail"),
+      title: 'Deletable capture',
+      source: 'app',
+      asset: createAsset('original'),
+      thumbnail: createAsset('thumbnail'),
     });
     database.updateAnnotations(
       capture.id,
       '{"canvas":{"objects":[]}}',
-      createAsset("rendered"),
+      createAsset('rendered'),
     );
 
     expect(
@@ -93,9 +93,9 @@ describe("AppDatabase", () => {
         .deleteCapture(capture.id)
         .map((asset) => asset.id)
         .sort(),
-    ).toEqual(["original", "rendered", "thumbnail"]);
+    ).toEqual(['original', 'rendered', 'thumbnail']);
     expect(database.listCaptures(0).captures).toEqual([]);
-    expect(() => database.getCapture(capture.id)).toThrow("Capture not found");
+    expect(() => database.getCapture(capture.id)).toThrow('Capture not found');
     database.close();
   });
 });

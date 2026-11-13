@@ -1,11 +1,11 @@
-import type { Tool } from "./annotation.types";
+import type { Tool } from './annotation.types';
 import {
   Brand,
   SaveButton,
   Spacer,
   ToolButton,
   Toolbar,
-} from "./annotation.styles";
+} from './annotation.styles';
 
 interface AnnotationToolbarProps {
   title: string;
@@ -38,10 +38,10 @@ export function AnnotationToolbar({
         <strong>Annotate capture</strong>
         <span>{title}</span>
       </Brand>
-      <ToolButton $active={tool === "select"} onClick={selectTool}>
+      <ToolButton $active={tool === 'select'} onClick={selectTool}>
         Select
       </ToolButton>
-      <ToolButton $active={tool === "pen"} onClick={drawTool}>
+      <ToolButton $active={tool === 'pen'} onClick={drawTool}>
         Draw
       </ToolButton>
       <ToolButton onClick={addRectangle}>Rectangle</ToolButton>
@@ -49,7 +49,7 @@ export function AnnotationToolbar({
       <ToolButton onClick={removeSelected}>Delete</ToolButton>
       <Spacer />
       <SaveButton disabled={saving || !canSave} onClick={save}>
-        {saving ? "Saving…" : "Save annotation"}
+        {saving ? 'Saving…' : 'Save annotation'}
       </SaveButton>
     </Toolbar>
   );

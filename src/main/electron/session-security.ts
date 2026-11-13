@@ -1,4 +1,4 @@
-import { session } from "electron";
+import { session } from 'electron';
 
 export const configureSessionSecurity = (): void => {
   session.defaultSession.setPermissionCheckHandler(() => false);
